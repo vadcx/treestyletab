@@ -42,9 +42,9 @@ export async function fromDragEvent(event) {
         urls.push(await mFileURLResolver(file));
       }
       else {
-      // Created object URLs need to be revoked by tryRevokeObjectURL()
-      // in common/common.js, after they are loaded.
-      urls.push(URL.createObjectURL(file));
+        // Created object URLs need to be revoked by tryRevokeObjectURL()
+        // in common/common.js, after they are loaded.
+        urls.push(URL.createObjectURL(file));
       }
     }
   }
