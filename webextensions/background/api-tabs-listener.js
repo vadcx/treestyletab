@@ -485,8 +485,10 @@ async function onNewTabTracked(tab, info) {
 
   try {
     tab = Tab.init(tab, { inBackground: false });
+    metric.add('init');
 
     const nextTab = Tab.getTabAt(win.id, tab.index);
+    metric.add('nextTab');
 
     // We need to update "active" state of a new active tab immediately.
     // Attaching of initial child tab (this new tab may become it) to an
@@ -495,10 +497,13 @@ async function onNewTabTracked(tab, info) {
     // tries to move focus to a nearest visible ancestor, instead of this
     // new active tab.
     // See also: https://github.com/piroor/treestyletab/issues/2155
-    if (tab.active)
+    if (tab.active) {
       TabsInternalOperation.setTabActive(tab);
+      metric.add('setTabActive');
+    }
 
     const uniqueId = await tab.$TST.promisedUniqueId;
+    metric.add('uniqueId resolved');
 
     if (!TabsStore.ensureLivingTab(tab)) { // it can be removed while waiting
       onCompleted(uniqueId);
@@ -695,6 +700,7 @@ async function onNewTabTracked(tab, info) {
 
     onCompleted(uniqueId);
     tab.$TST.removeState(Constants.kTAB_STATE_CREATING);
+    metric.add('remove creating state');
 
     if (TSTAPI.hasListenerForMessageType(TSTAPI.kNOTIFY_NEW_TAB_PROCESSED)) {
       const cache = {};
@@ -712,6 +718,7 @@ async function onNewTabTracked(tab, info) {
 
     // tab can be changed while creating!
     const renewedTab = await browser.tabs.get(tab.id).catch(ApiTabs.createErrorHandler(ApiTabs.handleMissingTabError));
+    metric.add('renewedTab');
     if (!renewedTab) {
       log(`onNewTabTracked(${dumpTab(tab)}): tab ${tab.id} is closed while tracking`);
       onCompleted(uniqueId);
