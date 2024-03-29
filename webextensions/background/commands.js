@@ -14,6 +14,7 @@ import {
   countMatched,
   configs,
   getWindowParamsFromSource,
+  tryRevokeObjectURL,
 } from '/common/common.js';
 import * as ApiTabs from '/common/api-tabs.js';
 import * as Bookmark from '/common/bookmark.js';
@@ -605,6 +606,9 @@ export async function moveTabsWithStructure(tabs, params = {}) {
       broadcast: true
     });
     movedRoots = Tab.collectRootTabs(movedTabs);
+    for (const tab of movedTabs) {
+      tryRevokeObjectURL(tab.url);
+    }
   }
   else if (params.duplicate ||
       windowId != destinationWindowId) {

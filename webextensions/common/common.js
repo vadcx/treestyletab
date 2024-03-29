@@ -876,6 +876,19 @@ export async function notify({ icon, title, message, timeout, url } = {}) {
 }
 
 
+export function tryRevokeObjectURL(url) {
+  if (!url.startsWith(`blob:${browser.runtime.getURL('') }`))
+    return;
+
+  try {
+    URL.revokeObjectURL(url);
+  }
+  catch(error) {
+    console.log('tryRevokeObjectURL failed: ', error);
+  }
+}
+
+
 export function compareAsNumber(a, b) {
   return a - b;
 }

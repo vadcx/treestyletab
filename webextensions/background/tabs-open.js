@@ -30,7 +30,8 @@ import EventListenerManager from '/extlib/EventListenerManager.js';
 
 import {
   log as internalLogger,
-  configs
+  configs,
+  tryRevokeObjectURL,
 } from '/common/common.js';
 import * as ApiTabs from '/common/api-tabs.js';
 import * as Constants from '/common/constants.js';
@@ -235,6 +236,7 @@ export async function openURIsInTabs(uris, { windowId, insertBefore, insertAfter
       log('tab is opened.');
       await tab.$TST.opened;
       tabs.push(tab);
+      tryRevokeObjectURL(tab.url);
       return tab;
     }));
   }, windowId));

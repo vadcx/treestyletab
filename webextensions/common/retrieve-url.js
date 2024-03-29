@@ -32,6 +32,8 @@ export async function fromDragEvent(event) {
   const urls = [];
   if (dt.files.length > 0) {
     for (const file of dt.files) {
+      // Created object URLs need to be revoked by tryRevokeObjectURL()
+      // in common/common.js, after they are loaded.
       urls.push(URL.createObjectURL(file));
     }
   }
