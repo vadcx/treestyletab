@@ -40,7 +40,6 @@ import {
 } from '/common/common.js';
 import * as ApiTabs from '/common/api-tabs.js';
 import * as Constants from '/common/constants.js';
-import * as MetricsData from '/common/metrics-data.js';
 import * as SidebarConnection from '/common/sidebar-connection.js';
 import * as TabsInternalOperation from '/common/tabs-internal-operation.js';
 import * as TabsStore from '/common/tabs-store.js';
@@ -48,6 +47,7 @@ import * as TreeBehavior from '/common/tree-behavior.js';
 import * as TSTAPI from '/common/tst-api.js';
 import * as UserOperationBlocker from '/common/user-operation-blocker.js';
 
+import MetricsData from '/common/MetricsData.js';
 import Tab from '/common/Tab.js';
 import Window from '/common/Window.js';
 

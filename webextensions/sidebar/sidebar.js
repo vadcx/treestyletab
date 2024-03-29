@@ -25,13 +25,13 @@ import * as Color from '/common/color.js';
 import * as Constants from '/common/constants.js';
 import * as ContextualIdentities from '/common/contextual-identities.js';
 import * as CssSelectorParser from '/common/css-selector-parser.js';
-import * as MetricsData from '/common/metrics-data.js';
 import * as TabsInternalOperation from '/common/tabs-internal-operation.js';
 import * as TabsStore from '/common/tabs-store.js';
 import * as TabsUpdate from '/common/tabs-update.js';
 import * as TSTAPI from '/common/tst-api.js';
 import * as UserOperationBlocker from '/common/user-operation-blocker.js';
 
+import MetricsData from '/common/MetricsData.js';
 import Tab from '/common/Tab.js';
 import Window from '/common/Window.js';
 

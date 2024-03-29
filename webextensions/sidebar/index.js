@@ -12,9 +12,9 @@ import {
   configs
 } from '/common/common.js';
 
-import * as MetricsData from '/common/metrics-data.js';
 import * as TabsStore from '/common/tabs-store.js';
 
+import MetricsData from '/common/MetricsData.js';
 import Tab from '/common/Tab.js';
 
 import * as BackgroundConnection from './background-connection.js';

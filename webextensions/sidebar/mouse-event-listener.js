@@ -39,12 +39,12 @@ import {
 } from '/common/common.js';
 import * as ApiTabs from '/common/api-tabs.js';
 import * as Constants from '/common/constants.js';
-import * as MetricsData from '/common/metrics-data.js';
 import * as RetrieveURL from '/common/retrieve-url.js';
 import * as TabsStore from '/common/tabs-store.js';
 import * as TreeBehavior from '/common/tree-behavior.js';
 import * as TSTAPI from '/common/tst-api.js';
 
+import MetricsData from '/common/MetricsData.js';
 import Tab from '/common/Tab.js';
 
 import * as BackgroundConnection from './background-connection.js';

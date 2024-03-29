@@ -17,12 +17,12 @@ import {
 import * as ApiTabs from '/common/api-tabs.js';
 import * as CacheStorage from '/common/cache-storage.js';
 import * as Constants from '/common/constants.js';
-import * as MetricsData from '/common/metrics-data.js';
 import * as TabsInternalOperation from '/common/tabs-internal-operation.js';
 import * as TabsStore from '/common/tabs-store.js';
 import * as TabsUpdate from '/common/tabs-update.js';
 import * as UniqueId from '/common/unique-id.js';
 
+import MetricsData from '/common/MetricsData.js';
 import Tab from '/common/Tab.js';
 
 import * as Tree from './tree.js';

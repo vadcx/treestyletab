@@ -17,7 +17,6 @@ import * as ApiTabs from '/common/api-tabs.js';
 import * as Constants from '/common/constants.js';
 import * as ContextualIdentities from '/common/contextual-identities.js';
 import * as Dialog from '/common/dialog.js';
-import * as MetricsData from '/common/metrics-data.js';
 import * as Permissions from '/common/permissions.js';
 import * as SidebarConnection from '/common/sidebar-connection.js';
 import * as Sync from '/common/sync.js';
@@ -27,6 +26,7 @@ import * as TSTAPI from '/common/tst-api.js';
 import * as UniqueId from '/common/unique-id.js';
 import '/common/bookmark.js'; // we need to load this once in the background page to register the global listener
 
+import MetricsData from '/common/MetricsData.js';
 import Tab from '/common/Tab.js';
 import Window from '/common/Window.js';
 
