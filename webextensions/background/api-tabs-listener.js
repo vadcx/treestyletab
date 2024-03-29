@@ -41,6 +41,7 @@ import * as TabsUpdate from '/common/tabs-update.js';
 import * as TreeBehavior from '/common/tree-behavior.js';
 import * as TSTAPI from '/common/tst-api.js';
 
+import MetricsData from '/common/MetricsData.js';
 import Tab from '/common/Tab.js';
 import Window from '/common/Window.js';
 
@@ -103,7 +104,7 @@ export function start() {
 
 const mTabOperationQueue = [];
 
-function addTabOperationQueue() {
+function addTabOperationQueue(metric = null) {
   let onCompleted;
   const previous = mTabOperationQueue[mTabOperationQueue.length - 1];
   const queue = new Promise((resolve, _aReject) => {
@@ -111,6 +112,8 @@ function addTabOperationQueue() {
   });
   queue.then(() => {
     mTabOperationQueue.splice(mTabOperationQueue.indexOf(queue), 1);
+    if (metric)
+      metric.add('TabOperationQueue proceeded');
   });
   mTabOperationQueue.push(queue);
   return [onCompleted, previous];
@@ -368,8 +371,12 @@ async function onHighlighted(highlightInfo) {
 }
 
 async function onCreated(tab) {
-  if (mPromisedStarted)
+  const metric = new MetricsData(`tab ${tab.id} (tabs.onCreated)`);
+
+  if (mPromisedStarted) {
     await mPromisedStarted;
+    metric.add('mPromisedStarted resolved');
+  }
 
   log('tabs.onCreated: ', dumpTab(tab));
 
@@ -379,7 +386,7 @@ async function onCreated(tab) {
   // Cache the initial windowId for Tab.onUpdated listner@handle-new-tabs.js
   tab.$windowIdOnCreated = tab.windowId;
 
-  return onNewTabTracked(tab, { trigger: 'tabs.onCreated' });
+  return onNewTabTracked(tab, { trigger: 'tabs.onCreated', metric });
 }
 
 async function onNewTabTracked(tab, info) {
@@ -393,6 +400,7 @@ async function onNewTabTracked(tab, info) {
   const activeTab            = Tab.getActiveTab(win.id);
   const fromExternal         = !mAppIsActive && !tab.openerTabId;
   const initialOpenerTabId   = tab.openerTabId;
+  const metric               = info.metric || new MetricsData(`tab ${tab.id}`);
 
   // New tab's index can become invalid because the value of "index" is same to
   // the one given to browser.tabs.create() (new tab) or the original index
@@ -416,6 +424,7 @@ async function onNewTabTracked(tab, info) {
   // operation updates the latest active tab in the window amd it becomes
   // impossible to know which tab was previously active.
   tab = Tab.track(tab);
+  metric.add('tracked');
 
   if (isNewTabCommandTab)
     tab.$isNewTabCommandTab = true;
@@ -440,13 +449,18 @@ async function onNewTabTracked(tab, info) {
     activeTab,
     fromExternal
   });
+  metric.add('Tab.onBeforeCreate proceeded');
 
-  if (Tab.needToWaitTracked(tab.windowId, { exceptionTabId: tab.id }))
+  if (Tab.needToWaitTracked(tab.windowId, { exceptionTabId: tab.id })) {
     await Tab.waitUntilTrackedAll(tab.windowId, { exceptionTabId: tab.id });
+    metric.add('Tab.waitUntilTrackedAll resolved');
+  }
 
-  const [onCompleted, previous] = addTabOperationQueue();
-  if (!configs.acceleratedTabOperations && previous)
+  const [onCompleted, previous] = addTabOperationQueue(metric);
+  if (!configs.acceleratedTabOperations && previous) {
     await previous;
+    metric.add('previous resolved');
+  }
 
   log(`onNewTabTracked(${dumpTab(tab)}): start to create tab element`);
 
@@ -467,6 +481,7 @@ async function onNewTabTracked(tab, info) {
   // attached, because the cacheed information was originally introduced for
   // failsafe around problems from tabs closed while waiting.
   Tree.onAttached.addListener(onTreeModified);
+  metric.add('Tree.onAttached proceeded');
 
   try {
     tab = Tab.init(tab, { inBackground: false });
@@ -490,12 +505,15 @@ async function onNewTabTracked(tab, info) {
       tab.$TST.rejectOpened();
       Tab.untrack(tab.id);
       warnTabDestroyedWhileWaiting(tab.id, tab);
+      metric.add('untracked');
+      log('  tab is untracked while tracking, metric: ', metric);
       return;
     }
 
     TabsUpdate.updateTab(tab, tab, {
       forceApply: true
     });
+    metric.add('TabsUpdate.updateTab proceeded');
 
     const duplicated = duplicatedInternally || uniqueId.duplicated;
     const restored   = uniqueId.restored;
@@ -552,6 +570,7 @@ async function onNewTabTracked(tab, info) {
             windowId: tab.windowId,
             restoredCount: lastCount,
           });
+          metric.add('Tab.onWindowRestoring proceeded');
           return lastCount;
         });
       }
@@ -562,6 +581,7 @@ async function onNewTabTracked(tab, info) {
       });
       await win.promisedAllTabsRestored;
       log(`onNewTabTracked(${dumpTab(tab)}): continued for restored tab`);
+      metric.add('win.promisedAllTabsRestored resolved');
     }
     if (!TabsStore.ensureLivingTab(tab)) {
       log(`onNewTabTracked(${dumpTab(tab)}):  => aborted`);
@@ -570,6 +590,8 @@ async function onNewTabTracked(tab, info) {
       Tab.untrack(tab.id);
       warnTabDestroyedWhileWaiting(tab.id, tab);
       Tree.onAttached.removeListener(onTreeModified);
+      metric.add('untracked');
+      log('  tab is untracked while tracking after updated, metric: ', metric);
       return;
     }
 
@@ -585,9 +607,12 @@ async function onNewTabTracked(tab, info) {
       activeTab,
       fromExternal
     });
+    metric.add('Tab.onCreating proceeded');
     // don't do await if not needed, to process things synchronously
-    if (moved instanceof Promise)
+    if (moved instanceof Promise) {
       moved = await moved;
+      metric.add('moved resolved');
+    }
     moved = moved === false;
 
     if (!TabsStore.ensureLivingTab(tab)) {
@@ -597,6 +622,8 @@ async function onNewTabTracked(tab, info) {
       Tab.untrack(tab.id);
       warnTabDestroyedWhileWaiting(tab.id, tab);
       Tree.onAttached.removeListener(onTreeModified);
+      metric.add('untracked');
+      log('  tab is untracked while tracking after moved, metric: ', metric);
       return;
     }
 
@@ -609,6 +636,7 @@ async function onNewTabTracked(tab, info) {
       maybeMoved: moved
     });
     log(`onNewTabTracked(${dumpTab(tab)}): moved = `, moved);
+    metric.add('kCOMMAND_NOTIFY_TAB_CREATING notified');
 
     if (TabsStore.ensureLivingTab(tab)) { // it can be removed while waiting
       win.openingTabs.add(tab.id);
@@ -625,6 +653,8 @@ async function onNewTabTracked(tab, info) {
       Tab.untrack(tab.id);
       warnTabDestroyedWhileWaiting(tab.id, tab);
       Tree.onAttached.removeListener(onTreeModified);
+      metric.add('untracked');
+      log('  tab is untracked while tracking after notified to sidebar, metric: ', metric);
       return;
     }
 
@@ -644,6 +674,7 @@ async function onNewTabTracked(tab, info) {
       fromExternal
     });
     tab.$TST.resolveOpened();
+    metric.add('Tab.onCreated proceeded');
 
     SidebarConnection.sendMessage({
       type:     Constants.kCOMMAND_NOTIFY_TAB_CREATED,
@@ -653,6 +684,7 @@ async function onNewTabTracked(tab, info) {
       active:   tab.active,
       maybeMoved: moved
     });
+    metric.add('kCOMMAND_NOTIFY_TAB_CREATED notified');
 
     if (!duplicated &&
         restored) {
@@ -675,6 +707,7 @@ async function onNewTabTracked(tab, info) {
         fromExternal,
       }, { tabProperties: ['tab', 'originalTab'], cache }).catch(_error => {});
       TSTAPI.clearCache(cache);
+      metric.add('API broadcaster');
     }
 
     // tab can be changed while creating!
@@ -686,6 +719,8 @@ async function onNewTabTracked(tab, info) {
       Tab.untrack(tab.id);
       warnTabDestroyedWhileWaiting(tab.id, tab);
       Tree.onAttached.removeListener(onTreeModified);
+      metric.add('untracked');
+      log('  tab is untracked while tracking after created, metric: ', metric);
       return;
     }
 
@@ -726,19 +761,24 @@ async function onNewTabTracked(tab, info) {
         delete changedProps.openerTabId;
         browser.tabs.update(tab.id, { openerTabId: updatedOpenerTabId });
       }
+      metric.add('changed openerTabId handled');
     }
 
-    if (Object.keys(renewedTab).length > 0)
+    if (Object.keys(renewedTab).length > 0) {
       onUpdated(tab.id, changedProps, renewedTab);
+      metric.add('onUpdated notified');
+    }
 
     const currentActiveTab = Tab.getActiveTab(tab.windowId);
     if (renewedTab.active &&
-        currentActiveTab.id != tab.id)
+        currentActiveTab.id != tab.id) {
       onActivated({
         tabId:         tab.id,
         windowId:      tab.windowId,
         previousTabId: currentActiveTab.id
       });
+      metric.add('onActivated notified');
+    }
 
     tab.$TST.memorizeNeighbors('newly tracked');
     if (tab.$TST.unsafePreviousTab)
@@ -747,7 +787,9 @@ async function onNewTabTracked(tab, info) {
       tab.$TST.unsafeNextTab.$TST.memorizeNeighbors('unsafeNextTab');
 
     Tree.onAttached.removeListener(onTreeModified);
+    metric.add('Tree.onAttached proceeded');
 
+    log('metric on finish: ', metric);
     return tab;
   }
   catch(error) {
@@ -755,6 +797,8 @@ async function onNewTabTracked(tab, info) {
     onCompleted();
     tab.$TST.removeState(Constants.kTAB_STATE_CREATING);
     Tree.onAttached.removeListener(onTreeModified);
+    metric.add('error handled ', error);
+    log('metric on error: ', metric);
   }
 }
 

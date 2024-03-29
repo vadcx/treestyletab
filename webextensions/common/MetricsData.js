@@ -5,8 +5,9 @@
 */
 
 export default class MetricsData {
-  constructor() {
+  constructor(name) {
     this.mItems = [];
+    this.mName = name || '';
 
     const now = Date.now();
     this.mInitialTime = now;
@@ -40,7 +41,7 @@ export default class MetricsData {
 
   toString() {
     const logs = this.mItems.map(item => `${item.delta || 0}: ${item.label}`);
-    return `total ${this.mDeltaBetweenLastItem} msec\n${logs.join('\n')}`;
+    return `${this.mName ? this.mName + ': ' : ''}total ${this.mDeltaBetweenLastItem} msec\n${logs.join('\n')}`;
   }
 
   static add(label) {
