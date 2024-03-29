@@ -309,7 +309,8 @@ Tab.onUpdated.addListener((tab, changeInfo = {}) => {
 });
 
 Tab.onStateChanged.addListener(tab => {
-  if (tab.status != 'complete')
+  if (!tab ||
+      tab.status != 'complete')
     return;
 
   if (typeof browser.tabs.discard == 'function') {

@@ -1509,7 +1509,8 @@ export default class Tab {
         break;
     }
 
-    if (modified &&
+    if (this.tab &&
+        modified &&
         Constants.IS_BACKGROUND &&
         broadcast !== false)
       Tab.broadcastState(this.tab, {
@@ -1524,7 +1525,8 @@ export default class Tab {
     }
     if (modified) {
       this.invalidateCache();
-      Tab.onStateChanged.dispatch(this.tab, state, true);
+      if (this.tab)
+        Tab.onStateChanged.dispatch(this.tab, state, true);
     }
   }
 
