@@ -26,15 +26,26 @@ const ACCEPTABLE_DATA_TYPES = [
   'text/plain'
 ];
 
+let mFileURLResolver = null;
+
+export async function registerFileURLResolver(resolver) {
+  mFileURLResolver = resolver;
+}
+
 export async function fromDragEvent(event) {
   log('fromDragEvent ', event);
   const dt = event.dataTransfer;
   const urls = [];
   if (dt.files.length > 0) {
     for (const file of dt.files) {
+      if (typeof mFileURLResolver == 'function') {
+        urls.push(await mFileURLResolver(file));
+      }
+      else {
       // Created object URLs need to be revoked by tryRevokeObjectURL()
       // in common/common.js, after they are loaded.
       urls.push(URL.createObjectURL(file));
+      }
     }
   }
   else {
