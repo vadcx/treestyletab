@@ -137,16 +137,14 @@ export function getCacheInfo() {
 }
 
 
-export async function reserveToUpdateVisualMaxTreeLevel() {
-  if (mPromisedInitialized)
-    await mPromisedInitialized;
-  log('reserveToUpdateVisualMaxTreeLevel');
+export function tryUpdateVisualMaxTreeLevel() {
+  log('tryUpdateVisualMaxTreeLevel');
   if (updateVisualMaxTreeLevel.waiting) {
     clearTimeout(updateVisualMaxTreeLevel.waiting);
     delete updateVisualMaxTreeLevel.waiting;
   }
 
-  reserveToUpdateVisualMaxTreeLevel.calledCount++;
+  tryUpdateVisualMaxTreeLevel.calledCount++;
 
   const animation = shouldApplyAnimation();
 
@@ -157,29 +155,32 @@ export async function reserveToUpdateVisualMaxTreeLevel() {
   // This threshold is a safe guard for uncared cases with too many call
   // of updateVisualMaxTreeLevel().
   // See also: https://github.com/piroor/treestyletab/issues/3383
-  if (reserveToUpdateVisualMaxTreeLevel.calledCount <= configs.maxAllowedImmediateRefreshCount &&
+  if (tryUpdateVisualMaxTreeLevel.calledCount <= configs.maxAllowedImmediateRefreshCount &&
       !animation) {
     updateVisualMaxTreeLevel();
-    if (reserveToUpdateVisualMaxTreeLevel.waitingToResetCalledCount)
-      clearTimeout(reserveToUpdateVisualMaxTreeLevel.waitingToResetCalledCount);
-    reserveToUpdateVisualMaxTreeLevel.waitingToResetCalledCount = setTimeout(() => {
-      delete reserveToUpdateVisualMaxTreeLevel.waitingToResetCalledCount;
-      reserveToUpdateVisualMaxTreeLevel.calledCount = 0;
+    if (tryUpdateVisualMaxTreeLevel.waitingToResetCalledCount)
+      clearTimeout(tryUpdateVisualMaxTreeLevel.waitingToResetCalledCount);
+    tryUpdateVisualMaxTreeLevel.waitingToResetCalledCount = setTimeout(() => {
+      delete tryUpdateVisualMaxTreeLevel.waitingToResetCalledCount;
+      tryUpdateVisualMaxTreeLevel.calledCount = 0;
     }, 0);
     return;
   }
 
-  const delay = animation ? configs.collapseDuration * 1.5 : 0;
+  const delay = animation ? Math.max(0, configs.collapseDuration) * 1.5 : 0;
 
   updateVisualMaxTreeLevel.waiting = setTimeout(() => {
     delete updateVisualMaxTreeLevel.waiting;
-    reserveToUpdateVisualMaxTreeLevel.calledCount = 0;
+    tryUpdateVisualMaxTreeLevel.calledCount = 0;
     updateVisualMaxTreeLevel();
   }, delay);
 }
-reserveToUpdateVisualMaxTreeLevel.calledCount = 0;
+tryUpdateVisualMaxTreeLevel.calledCount = 0;
 
-function updateVisualMaxTreeLevel() {
+async function updateVisualMaxTreeLevel() {
+  if (mPromisedInitialized)
+    await mPromisedInitialized;
+
   const maxLevel = getMaxTreeLevel(mTargetWindow, {
     onlyVisible: configs.indentAutoShrinkOnlyForVisible
   });
@@ -219,22 +220,19 @@ CollapseExpand.onUpdated.addListener((tab, _options) => {
   const isFinishBatch = restVisibilityChangedTabIds.has(tab.id);
   restVisibilityChangedTabIds.delete(tab.id);
 
-  if (configs.indentAutoShrink &&
-      configs.indentAutoShrinkOnlyForVisible)
-    reserveToUpdateVisualMaxTreeLevel();
-
-  // On no-animation mode, we should update max indent level immediately
-  // as possible as we can without delay, to reduce visual flicking which
-  // can trigger an epileptic seizure.
-  // But we also have to reduce needless function calls for better performance.
-  // So we throttle the function call of updateVisualMaxTreeLevel() until
-  // collapsed state of all tabs notified with "kCOMMAND_NOTIFY_SUBTREE_COLLAPSED_STATE_CHANGED"
-  // are completely updated.
-  // See also: https://github.com/piroor/treestyletab/issues/3383
-  if (isFinishBatch &&
-      restVisibilityChangedTabIds.size == 0 &&
-      !shouldApplyAnimation())
-    updateVisualMaxTreeLevel();
+  if ((configs.indentAutoShrink &&
+       configs.indentAutoShrinkOnlyForVisible) ||
+      // On no-animation mode, we should update max indent level immediately
+      // as possible as we can without delay, to reduce visual flicking which
+      // can trigger an epileptic seizure.
+      // But we also have to reduce needless function calls for better performance.
+      // So we throttle the function call of updateVisualMaxTreeLevel() until
+      // collapsed state of all tabs notified with "kCOMMAND_NOTIFY_SUBTREE_COLLAPSED_STATE_CHANGED"
+      // are completely updated.
+      // See also: https://github.com/piroor/treestyletab/issues/3383
+      (isFinishBatch &&
+       restVisibilityChangedTabIds.size == 0))
+    tryUpdateVisualMaxTreeLevel();
 });
 
 const BUFFER_KEY_PREFIX = 'indent-';
@@ -244,7 +242,7 @@ BackgroundConnection.onMessage.addListener(async message => {
     case Constants.kCOMMAND_NOTIFY_TAB_CREATED:
     case Constants.kCOMMAND_NOTIFY_TAB_REMOVING:
       log('listen: ', message.type);
-      reserveToUpdateVisualMaxTreeLevel();
+      tryUpdateVisualMaxTreeLevel();
       break;
 
     case Constants.kCOMMAND_NOTIFY_TAB_SHOWN:
@@ -252,7 +250,7 @@ BackgroundConnection.onMessage.addListener(async message => {
     case Constants.kCOMMAND_NOTIFY_CHILDREN_CHANGED:
       log('listen: ', message.type);
       reserveToUpdateIndent();
-      reserveToUpdateVisualMaxTreeLevel();
+      tryUpdateVisualMaxTreeLevel();
       break;
 
     case Constants.kCOMMAND_NOTIFY_TAB_LEVEL_CHANGED: {
@@ -277,9 +275,8 @@ BackgroundConnection.onMessage.addListener(async message => {
       break;
 
     case Constants.kCOMMAND_NOTIFY_TAB_COLLAPSED_STATE_CHANGED:
-      if (!restVisibilityChangedTabIds.has(message.tabId) &&
-          !shouldApplyAnimation())
-        updateVisualMaxTreeLevel();
+      if (!restVisibilityChangedTabIds.has(message.tabId))
+        tryUpdateVisualMaxTreeLevel();
       break;
   }
 });

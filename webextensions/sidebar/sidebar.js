@@ -279,7 +279,7 @@ export async function init() {
       SubPanel.init();
 
       SidebarTabs.init();
-      Indent.reserveToUpdateVisualMaxTreeLevel();
+      Indent.tryUpdateVisualMaxTreeLevel();
 
       shouldApplyAnimation.onChanged.addListener(applyAnimationState);
       applyAnimationState(shouldApplyAnimation());
