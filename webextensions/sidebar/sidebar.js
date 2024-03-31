@@ -224,8 +224,6 @@ export async function init() {
       log('Start to process messages including queued ones');
       BackgroundConnection.start();
 
-      SidebarTabs.onSyncFailed.addListener(() => rebuildAll());
-
       configs.$addObserver(onConfigChange);
       onConfigChange('debug');
       onConfigChange('sidebarPosition');
@@ -309,6 +307,7 @@ export async function init() {
   // Failsafe. If the sync operation fail after retryings,
   // SidebarTabs.onSyncFailed is notified then this sidebar page will be
   // reloaded for complete retry.
+  SidebarTabs.onSyncFailed.addListener(() => rebuildAll());
   SidebarTabs.reserveToSyncTabsOrder();
 
   Size.onUpdated.addListener(() => {
