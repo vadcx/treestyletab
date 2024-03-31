@@ -540,7 +540,7 @@ function updateContextualIdentitiesSelector() {
   range.detach();
 }
 
-export async function rebuildAll(importedTabs) {
+async function rebuildAll(importedTabs) {
   MetricsData.add('rebuildAll: start');
   const trackedWindow = TabsStore.windows.get(mTargetWindow);
   if (!trackedWindow)
