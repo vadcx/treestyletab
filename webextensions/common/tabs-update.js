@@ -213,7 +213,11 @@ export function updateTab(tab, newState = {}, options = {}) {
            'favIconUrl' in newState) {
     tab.$TST.setAttribute(Constants.kCURRENT_FAVICON_URI, update.attributes.added[Constants.kCURRENT_FAVICON_URI] = tab.favIconUrl);
     update.attributes.removed.delete(Constants.kCURRENT_FAVICON_URI);
-    update.favIconUrl = tab.favIconUrl;
+    // "favIconUrl" will be "undefined" if the website has no favicon.
+    // Keys with "undefined" value will be removed from JSON-stringified result,
+    // so we need to use "null" instead of it.
+    // See also: https://github.com/piroor/treestyletab/issues/3515
+    update.favIconUrl = tab.favIconUrl || null;
   }
   else if (tab.$TST.isGroupTab) {
     // "about:treestyletab-group" can set error icon for the favicon and
