@@ -83,8 +83,10 @@ export function init(scrollPosition) {
   // We should cached scroll positions, because accessing to those properties is slow.
   mPinnedScrollBox.$scrollTop    = 0;
   mPinnedScrollBox.$scrollTopMax = mPinnedScrollBox.scrollTopMax;
+  mPinnedScrollBox.$offsetHeight = mPinnedScrollBox.offsetHeight;
   mNormalScrollBox.$scrollTop    = 0;
   mNormalScrollBox.$scrollTopMax = mNormalScrollBox.scrollTopMax;
+  mNormalScrollBox.$offsetHeight = mNormalScrollBox.offsetHeight;
 
   // We need to register the lister as non-passive to cancel the event.
   // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#Improving_scrolling_performance_with_passive_listeners
@@ -98,14 +100,18 @@ export function init(scrollPosition) {
   TSTAPI.onMessageExternal.addListener(onMessageExternal);
   SidebarTabs.onNormalTabsChanged.addListener(_tab => {
     mNormalScrollBox.$scrollTopMax = mNormalScrollBox.scrollTopMax;
+    mNormalScrollBox.$offsetHeight = mNormalScrollBox.offsetHeight;
     reserveToRenderVirtualScrollViewport({ trigger: 'tabsChanged' });
   });
   SidebarTabs.onPinnedTabsChanged.addListener(_tab => {
     mPinnedScrollBox.$scrollTopMax = mPinnedScrollBox.scrollTopMax;
+    mPinnedScrollBox.$offsetHeight = mPinnedScrollBox.offsetHeight;
   });
   Size.onUpdated.addListener(() => {
     mPinnedScrollBox.$scrollTopMax = mPinnedScrollBox.scrollTopMax;
+    mPinnedScrollBox.$offsetHeight = mPinnedScrollBox.offsetHeight;
     mNormalScrollBox.$scrollTopMax = mNormalScrollBox.scrollTopMax;
+    mNormalScrollBox.$offsetHeight = mNormalScrollBox.offsetHeight;
     reserveToRenderVirtualScrollViewport({ trigger: 'resized', force: true });
   });
 
@@ -226,8 +232,10 @@ function renderVirtualScrollViewport(scrollPosition = undefined) {
   const allTabsSizeHolder = win.containerElement.parentNode;
   const resized           = allTabsSizeHolder.dataset.height != allRenderableTabsSize;
   allTabsSizeHolder.dataset.height = allRenderableTabsSize;
-  if (resized)
-    mNormalScrollBox.$scrollTopMax = mNormalScrollBox.scrollTopMax;
+  if (resized) {
+    mNormalScrollBox.$offsetHeight = mNormalScrollBox.offsetHeight;
+    mNormalScrollBox.$scrollTopMax = /*mNormalScrollBox.scrollTopMax*/allRenderableTabsSize - mNormalScrollBox.$offsetHeight;
+  }
 
   const renderablePaddingSize = staticRendering ?
     allRenderableTabsSize :
@@ -235,7 +243,7 @@ function renderVirtualScrollViewport(scrollPosition = undefined) {
   scrollPosition = Math.max(
     0,
     Math.min(
-      allRenderableTabsSize + mNormalScrollBox.querySelector(`.${Constants.kTABBAR_SPACER}`).offsetHeight - viewPortSize,
+      allRenderableTabsSize + (mNormalScrollBox.querySelector(`.${Constants.kTABBAR_SPACER}`).$offsetHeight || 0) - viewPortSize,
       typeof scrollPosition == 'number' ?
         scrollPosition :
         restoreScrollPosition.scrollPosition > -1 ?
@@ -1124,7 +1132,7 @@ async function onBackgroundMessage(message) {
           break;
 
         case 'pageup':
-          smoothScrollBy(-scrollBox.offsetHeight + Size.getRenderedTabHeight());
+          smoothScrollBy(-scrollBox.$offsetHeight + Size.getRenderedTabHeight());
           break;
 
         case 'linedown':
@@ -1132,7 +1140,7 @@ async function onBackgroundMessage(message) {
           break;
 
         case 'pagedown':
-          smoothScrollBy(scrollBox.offsetHeight - Size.getRenderedTabHeight());
+          smoothScrollBy(scrollBox.$offsetHeight - Size.getRenderedTabHeight());
           break;
 
         default:
@@ -1340,7 +1348,7 @@ export function tryLockPosition(tabIds, reason) {
   }
 
   // Lock scroll position only when the closing affects to the max scroll position.
-  if (mNormalScrollBox.$scrollTop < mNormalScrollBox.$scrollTopMax - Size.getRenderedTabHeight() - mNormalScrollBox.querySelector(`.${Constants.kTABBAR_SPACER}`).offsetHeight) {
+  if (mNormalScrollBox.$scrollTop < mNormalScrollBox.$scrollTopMax - Size.getRenderedTabHeight() - (mNormalScrollBox.querySelector(`.${Constants.kTABBAR_SPACER}`).$offsetHeight || 0)) {
     log('tryLockPosition: scroll position is not affected ', tabIds, {
       scrollTop: mNormalScrollBox.$scrollTop,
       scrollTopMax: mNormalScrollBox.$scrollTopMax,
@@ -1356,8 +1364,10 @@ export function tryLockPosition(tabIds, reason) {
   log('tryLockPosition ', tabIds);
   const spacer = mNormalScrollBox.querySelector(`.${Constants.kTABBAR_SPACER}`);
   const count = tryLockPosition.tabIds.size;
-  spacer.style.minHeight = `${Size.getRenderedTabHeight() * count}px`;
+  const height = Size.getRenderedTabHeight() * count;
+  spacer.style.minHeight = `${height}px`;
   spacer.dataset.removedOrCollapsedTabsCount = count;
+  spacer.$offsetHeight = height;
 
   if (!tryFinishPositionLocking.listening) {
     tryFinishPositionLocking.listening = true;
