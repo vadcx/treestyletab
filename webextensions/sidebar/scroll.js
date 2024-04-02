@@ -77,6 +77,8 @@ const mNormalScrollBox  = document.querySelector('#normal-tabs-container');
 const mTabBar           = document.querySelector('#tabbar');
 const mOutOfViewTabNotifier = document.querySelector('#out-of-view-tab-notifier');
 
+let mTabbarSpacerSize = 0;
+
 let mScrollingInternallyCount = 0;
 
 export function init(scrollPosition) {
@@ -243,7 +245,7 @@ function renderVirtualScrollViewport(scrollPosition = undefined) {
   scrollPosition = Math.max(
     0,
     Math.min(
-      allRenderableTabsSize + (mNormalScrollBox.querySelector(`.${Constants.kTABBAR_SPACER}`).$offsetHeight || 0) - viewPortSize,
+      allRenderableTabsSize + mTabbarSpacerSize - viewPortSize,
       typeof scrollPosition == 'number' ?
         scrollPosition :
         restoreScrollPosition.scrollPosition > -1 ?
@@ -1348,7 +1350,7 @@ export function tryLockPosition(tabIds, reason) {
   }
 
   // Lock scroll position only when the closing affects to the max scroll position.
-  if (mNormalScrollBox.$scrollTop < mNormalScrollBox.$scrollTopMax - Size.getRenderedTabHeight() - (mNormalScrollBox.querySelector(`.${Constants.kTABBAR_SPACER}`).$offsetHeight || 0)) {
+  if (mNormalScrollBox.$scrollTop < mNormalScrollBox.$scrollTopMax - Size.getRenderedTabHeight() - mTabbarSpacerSize) {
     log('tryLockPosition: scroll position is not affected ', tabIds, {
       scrollTop: mNormalScrollBox.$scrollTop,
       scrollTopMax: mNormalScrollBox.$scrollTopMax,
@@ -1367,7 +1369,7 @@ export function tryLockPosition(tabIds, reason) {
   const height = Size.getRenderedTabHeight() * count;
   spacer.style.minHeight = `${height}px`;
   spacer.dataset.removedOrCollapsedTabsCount = count;
-  spacer.$offsetHeight = height;
+  mTabbarSpacerSize = height;
 
   if (!tryFinishPositionLocking.listening) {
     tryFinishPositionLocking.listening = true;
@@ -1396,8 +1398,10 @@ export function tryUnlockPosition(tabIds) {
     Math.max(0, configs.collapseDuration) + 250 /* safety margin to wait finishing of the min-height animation of virtual-scroll-container */ :
     0;
   setTimeout(() => {
-    spacer.style.minHeight = `${Size.getRenderedTabHeight() * count}px`;
+    const height = Size.getRenderedTabHeight() * count;
+    spacer.style.minHeight = `${height}px`;
     spacer.dataset.removedOrCollapsedTabsCount = count;
+    mTabbarSpacerSize = height;
   }, timeout);
 }
 
@@ -1451,6 +1455,7 @@ function tryFinishPositionLocking(event) {
   const spacer = mNormalScrollBox.querySelector(`.${Constants.kTABBAR_SPACER}`);
   spacer.dataset.removedOrCollapsedTabsCount = 0;
   spacer.style.minHeight = '';
+  mTabbarSpacerSize = 0;
   onPositionUnlocked.dispatch();
 }
 tryFinishPositionLocking.contextMenuOpen = false;
