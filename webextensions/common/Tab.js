@@ -501,7 +501,9 @@ export default class Tab {
 
   get canBecomeSticky() {
     if (this.tab?.pinned ||
-        this.collapsed)
+        this.collapsed ||
+        this.states.has(Constants.kTAB_STATE_EXPANDING) ||
+        this.states.has(Constants.kTAB_STATE_COLLAPSING))
       return false;
 
     if (this.sticky)
