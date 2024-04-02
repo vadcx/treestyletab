@@ -85,6 +85,10 @@ function getWindowDimension() {
   return `(${window.screenX},${window.screenY}), ${window.outerWidth}x${window.outerHeight}, innerX=${window.mozInnerScreenX}`;
 }
 
+export function getOffset() {
+  return mOffset;
+}
+
 function updateOffset() {
   const dimension = getWindowDimension();
 

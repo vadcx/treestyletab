@@ -37,6 +37,7 @@ import * as TabsStore from '/common/tabs-store.js';
 import Tab from '/common/Tab.js';
 
 import * as BackgroundConnection from './background-connection.js';
+import * as GapCanceller from './gap-canceller.js';
 import * as SidebarTabs from './sidebar-tabs.js';
 import * as Size from './size.js';
 
@@ -46,7 +47,6 @@ function log(...args) {
 }
 
 let mTargetWindow;
-const mTabBar = document.querySelector('#tabbar');
 let mAreaHeight     = 0;
 let mMaxVisibleRows = 0;
 
@@ -85,8 +85,7 @@ export function reposition(options = {}) {
   let row    = 0;
 
   const pinnedTabsAreaRatio = Math.min(Math.max(0, configs.maxPinnedTabsRowsAreaPercentage), 100) / 100;
-  const visualGap = parseFloat(window.getComputedStyle(mTabBar, null).getPropertyValue('--visual-gap-offset').replace(/px$/));
-  const allTabsAreaHeight = mTabBar.parentNode.offsetHeight + visualGap;
+  const allTabsAreaHeight   = Size.getAllTabsAreaSize() + GapCanceller.getOffset();
   mMaxVisibleRows = Math.max(1, Math.floor((allTabsAreaHeight * pinnedTabsAreaRatio) / height));
   const contentsHeight = height * maxRow + (faviconized ? Size.getFavIconizedTabYOffset() : Size.getTabYOffset());
   mAreaHeight = Math.min(

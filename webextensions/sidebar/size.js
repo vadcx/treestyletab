@@ -37,6 +37,7 @@ let mPinnedTabsScrollBoxRect;
 let mPinnedTabsContainerWidth
 let mNormalTabsScrollBoxRect;
 let mNormalTabsViewPortSize = 0;
+let mAllTabsAreaSize    = 0;
 
 export function getTabHeight() {
   return mTabHeight;
@@ -98,6 +99,10 @@ export function getNormalTabsViewPortSize() {
 
 export function getPinnedTabsContainerWidth() {
   return mPinnedTabsContainerWidth;
+}
+
+export function getAllTabsAreaSize() {
+  return mAllTabsAreaSize;
 }
 
 export function init() {
@@ -211,6 +216,8 @@ export function updateContainers() {
   const normalTabsViewPortFollowingAreaSize = range.getBoundingClientRect().height;
   mNormalTabsViewPortSize = mTabBar.offsetHeight - normalTabsViewPortPrecedingAreaSize - normalTabsViewPortFollowingAreaSize;
   range.detach();
+
+  mAllTabsAreaSize = mTabBar.parentNode.offsetHeight;
 }
 
 export function calc(expression) {
