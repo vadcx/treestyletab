@@ -19,6 +19,7 @@ import Tab from '/common/Tab.js';
 
 import * as EventUtils from './event-utils.js';
 import * as Sidebar from './sidebar.js';
+import * as SidebarTabs from './sidebar-tabs.js';
 import * as Size from './size.js';
 
 import {
@@ -33,6 +34,14 @@ let mTargetWindow;
 
 Sidebar.onInit.addListener(() => {
   mTargetWindow = TabsStore.getCurrentWindowId();
+});
+
+SidebarTabs.onReuseTabElement.addListener(tabElement => {
+  setExtraTabContentsToElement(tabElement, '*', { place: 'tab-indent' });
+  setExtraTabContentsToElement(tabElement, '*', { place: 'tab-front' });
+  setExtraTabContentsToElement(tabElement, '*', { place: 'tab-behind' });
+  setExtraTabContentsToElement(tabElement, '*', { place: 'tab-above' });
+  setExtraTabContentsToElement(tabElement, '*', { place: 'tab-below' });
 });
 
 const mAddonsWithExtraContents = new Set();
@@ -360,6 +369,13 @@ export function setExtraContentsTo(tab, id, params = {}) {
 }
 
 function setExtraContentsToContainer(container, id, params = {}) {
+  if (id == '*') {
+    for (const id of container.itemById.keys()) {
+      setExtraContentsToContainer(container, id, params = {});
+    }
+    return;
+  }
+
   if (typeof id != 'string') { // the addon id is optional
     params = id;
     id = browser.runtime.id;

@@ -53,6 +53,7 @@ export const onNormalTabsChanged = new EventListenerManager();
 export const onTabsRendered   = new EventListenerManager();
 export const onTabsUnrendered = new EventListenerManager();
 export const onSyncFailed = new EventListenerManager();
+export const onReuseTabElement = new EventListenerManager();
 
 export function init() {
   document.querySelector('#sync-throbber').addEventListener('animationiteration', synchronizeThrobberAnimation);
@@ -232,7 +233,8 @@ export function renderTab(tab, { containerElement, insertBefore } = {}) {
   let created = false;
   if (!tab.$TST.element ||
       !tab.$TST.element.parentNode) {
-    const tabElement = (mTabElementsPool.length > 0) ?
+    const reuseFromPool = (mTabElementsPool.length > 0);
+    const tabElement = reuseFromPool ?
       mTabElementsPool.pop() :
       document.createElement(kTAB_ELEMENT_NAME);
     tab.$TST.bindElement(tabElement);
@@ -241,6 +243,10 @@ export function renderTab(tab, { containerElement, insertBefore } = {}) {
     tab.$TST.setAttribute(Constants.kAPI_WINDOW_ID, tab.windowId || -1);
     tab.$TST.addState(Constants.kTAB_STATE_THROBBER_UNSYNCHRONIZED);
     TabsStore.addUnsynchronizedTab(tab);
+    if (reuseFromPool) {
+      tabElement.favIconUrl = null;
+      onReuseTabElement.dispatch(tabElement);
+    }
     created = true;
   }
 
