@@ -226,11 +226,11 @@ function renderVirtualScrollViewport(scrollPosition = undefined) {
   mNormalScrollBox.querySelector('.virtual-scroll-container').style.minHeight = `${viewPortSize < allRenderableTabsSize ? allRenderableTabsSize : 0}px`;
 
   const allTabsSizeHolder = win.containerElement.parentNode;
-  const resized           = allTabsSizeHolder.dataset.height != allRenderableTabsSize;
-  allTabsSizeHolder.dataset.height = allRenderableTabsSize;
+  const resized           = allTabsSizeHolder.$lastHeight != allRenderableTabsSize;
+  allTabsSizeHolder.$lastHeight = allRenderableTabsSize;
   if (resized) {
     mNormalScrollBox.$offsetHeight = mNormalScrollBox.offsetHeight;
-    mNormalScrollBox.$scrollTopMax = /*mNormalScrollBox.scrollTopMax*/allRenderableTabsSize - mNormalScrollBox.$offsetHeight;
+    mNormalScrollBox.$scrollTopMax = /*mNormalScrollBox.scrollTopMax*/allRenderableTabsSize - viewPortSize;
   }
 
   const renderablePaddingSize = staticRendering ?
