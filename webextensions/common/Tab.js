@@ -2836,15 +2836,12 @@ Tab.getSelectedTabs = (windowId = null, options = {}) => {
     return Tab.sort(Array.from(new Set([...selectedTabs, ...Array.from(highlightedTabs.values())])));
 };
 
-Tab.getVirtualScrollRenderableTabs = (windowId = null, options = {}) => {
+Tab.getVirtualScrollRenderableTabs = (windowId = null) => {
   return TabsStore.queryAll({
     windowId,
     tabs:    TabsStore.getTabsMap(TabsStore.virtualScrollRenderableTabsInWindow, windowId),
+    skipMatching: true,
     ordered: true,
-    living:  false,
-    visible: false,
-    controllable: false,
-    ...options
   });
 };
 

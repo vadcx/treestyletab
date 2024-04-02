@@ -137,7 +137,8 @@ function extractMatchedTabs(tabs, query, offset) {
   let firstTime     = true;
   let logicalIndex  = offset || 0;
   for (const tab of tabs) {
-    if (!matchedWithQuery(tab, query))
+    if (!query.skipMatching &&
+        !matchedWithQuery(tab, query))
       continue;
 
     if (!firstTime)
@@ -158,7 +159,8 @@ function* getMatchedTabsIterator(tabs, query, offset) {
   let firstTime     = true;
   let logicalIndex  = offset || 0;
   for (const tab of tabs) {
-    if (!matchedWithQuery(tab, query))
+    if (!query.skipMatching &&
+        !matchedWithQuery(tab, query))
       continue;
 
     if (!firstTime)
