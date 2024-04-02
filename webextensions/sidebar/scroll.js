@@ -80,6 +80,12 @@ const mOutOfViewTabNotifier = document.querySelector('#out-of-view-tab-notifier'
 let mScrollingInternallyCount = 0;
 
 export function init(scrollPosition) {
+  // We should cached scroll positions, because accessing to those properties is slow.
+  mPinnedScrollBox.$scrollTop    = 0;
+  mPinnedScrollBox.$scrollTopMax = mPinnedScrollBox.scrollTopMax;
+  mNormalScrollBox.$scrollTop    = 0;
+  mNormalScrollBox.$scrollTopMax = mNormalScrollBox.scrollTopMax;
+
   // We need to register the lister as non-passive to cancel the event.
   // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#Improving_scrolling_performance_with_passive_listeners
   document.addEventListener('wheel', onWheel, { capture: true, passive: false });
@@ -91,9 +97,15 @@ export function init(scrollPosition) {
   BackgroundConnection.onMessage.addListener(onBackgroundMessage);
   TSTAPI.onMessageExternal.addListener(onMessageExternal);
   SidebarTabs.onNormalTabsChanged.addListener(_tab => {
+    mNormalScrollBox.$scrollTopMax = mNormalScrollBox.scrollTopMax;
     reserveToRenderVirtualScrollViewport({ trigger: 'tabsChanged' });
   });
+  SidebarTabs.onPinnedTabsChanged.addListener(_tab => {
+    mPinnedScrollBox.$scrollTopMax = mPinnedScrollBox.scrollTopMax;
+  });
   Size.onUpdated.addListener(() => {
+    mPinnedScrollBox.$scrollTopMax = mPinnedScrollBox.scrollTopMax;
+    mNormalScrollBox.$scrollTopMax = mNormalScrollBox.scrollTopMax;
     reserveToRenderVirtualScrollViewport({ trigger: 'resized', force: true });
   });
 
@@ -101,8 +113,8 @@ export function init(scrollPosition) {
   if (typeof scrollPosition != 'number')
     return;
 
-  mNormalScrollBox.scrollTop = scrollPosition;
-  if (scrollPosition <= mNormalScrollBox.scrollTopMax)
+  mNormalScrollBox.scrollTop = mNormalScrollBox.$scrollTop = scrollPosition;
+  if (scrollPosition <= mNormalScrollBox.$scrollTopMax)
     return;
 
   mScrollingInternallyCount++;
@@ -136,12 +148,12 @@ function onInitialUpdate() {
 }
 function restoreScrollPosition() {
   if (restoreScrollPosition.retryCount < 10 &&
-      restoreScrollPosition.scrollPosition > mNormalScrollBox.scrollTopMax) {
+      restoreScrollPosition.scrollPosition > mNormalScrollBox.$scrollTopMax) {
     restoreScrollPosition.retryCount++;
     return window.requestAnimationFrame(restoreScrollPosition);
   }
 
-  mNormalScrollBox.scrollTop = restoreScrollPosition.scrollPosition;
+  mNormalScrollBox.scrollTop = mNormalScrollBox.$scrollTop = restoreScrollPosition.scrollPosition;
   restoreScrollPosition.scrollPosition = -1;
   window.requestAnimationFrame(() => {
     mScrollingInternallyCount--;
@@ -214,6 +226,8 @@ function renderVirtualScrollViewport(scrollPosition = undefined) {
   const allTabsSizeHolder = win.containerElement.parentNode;
   const resized           = allTabsSizeHolder.dataset.height != allRenderableTabsSize;
   allTabsSizeHolder.dataset.height = allRenderableTabsSize;
+  if (resized)
+    mNormalScrollBox.$scrollTopMax = mNormalScrollBox.scrollTopMax;
 
   const renderablePaddingSize = staticRendering ?
     allRenderableTabsSize :
@@ -226,7 +240,7 @@ function renderVirtualScrollViewport(scrollPosition = undefined) {
         scrollPosition :
         restoreScrollPosition.scrollPosition > -1 ?
           restoreScrollPosition.scrollPosition :
-          mNormalScrollBox.scrollTop
+          mNormalScrollBox.$scrollTop
     )
   );
   mScrollPosition = scrollPosition;
@@ -402,7 +416,7 @@ function updateStickyTabs(renderableTabs, { staticRendering, skipRefreshTabs } =
     const index = renderableTabs.indexOf(tab);
     if (index > -1 &&
         index > (lastInViewportIndex - stickyTabIdsBelow.size) &&
-        mNormalScrollBox.scrollTop < mNormalScrollBox.scrollTopMax &&
+        mNormalScrollBox.$scrollTop < mNormalScrollBox.$scrollTopMax &&
         (index - (lastInViewportIndex - stickyTabIdsBelow.size) > 1 ||
          removedOrCollapsedTabsCount == 0)) {
       stickyTabIdsBelow.add(tab.id);
@@ -416,7 +430,7 @@ function updateStickyTabs(renderableTabs, { staticRendering, skipRefreshTabs } =
     const index = renderableTabs.indexOf(tab);
     if (index > -1 &&
         index < (firstInViewportIndex + stickyTabIdsAbove.size) &&
-        mNormalScrollBox.scrollTop > 0) {
+        mNormalScrollBox.$scrollTop > 0) {
       stickyTabs.push(tab);
       stickyTabIdsAbove.add(tab.id);
       continue;
@@ -514,7 +528,7 @@ export function getTabRect(tab) {
     if (index < -1) // no nearest visible tab: treat as a last tab
       index = renderableTabs.length;
   }
-  const tabTop = Size.getRenderedTabHeight() * index + scrollBoxRect.top - scrollBox.scrollTop;
+  const tabTop = Size.getRenderedTabHeight() * index + scrollBoxRect.top - scrollBox.$scrollTop;
   return {
     top:    tabTop,
     bottom: tabTop + tabSize,
@@ -545,11 +559,11 @@ function scrollTo(params = {}) {
   //cancelPerformingAutoScroll();
   const scrollBox = getScrollBoxFor(params.tab);
   const scrollTop = params.tab ?
-    scrollBox.scrollTop + calculateScrollDeltaForTab(params.tab) :
+    scrollBox.$scrollTop + calculateScrollDeltaForTab(params.tab) :
     typeof params.position == 'number' ?
       params.position :
       typeof params.delta == 'number' ?
-        mNormalScrollBox.scrollTop + params.delta :
+        mNormalScrollBox.$scrollTop + params.delta :
         undefined;
   if (scrollTop === undefined)
     throw new Error('No parameter to indicate scroll position');
@@ -557,7 +571,7 @@ function scrollTo(params = {}) {
   // render before scroll, to prevent showing blank area
   mScrollingInternallyCount++;
   renderVirtualScrollViewport(scrollTop);
-  scrollBox.scrollTop = scrollTop;
+  scrollBox.scrollTop = scrollBox.$scrollTop = scrollTop;
   window.requestAnimationFrame(() => {
     mScrollingInternallyCount--;
   });
@@ -640,17 +654,17 @@ async function smoothScrollTo(params = {}) {
 
   let delta, startPosition, endPosition;
   if (params.tab) {
-    startPosition = scrollBox.scrollTop;
+    startPosition = scrollBox.$scrollTop;
     delta       = calculateScrollDeltaForTab(params.tab);
     endPosition = startPosition + delta;
   }
   else if (typeof params.position == 'number') {
-    startPosition = scrollBox.scrollTop;
+    startPosition = scrollBox.$scrollTop;
     endPosition = params.position;
     delta       = endPosition - startPosition;
   }
   else if (typeof params.delta == 'number') {
-    startPosition = scrollBox.scrollTop;
+    startPosition = scrollBox.$scrollTop;
     endPosition = startPosition + params.delta;
     delta       = params.delta;
   }
@@ -700,7 +714,7 @@ smoothScrollTo.currentOffset= 0;
 
 async function smoothScrollBy(delta) {
   return smoothScrollTo({
-    position: getScrollBoxFor(Tab.getActiveTab(TabsStore.getCurrentWindowId())).scrollTop + delta,
+    position: getScrollBoxFor(Tab.getActiveTab(TabsStore.getCurrentWindowId())).$scrollTop + delta,
   });
 }
 
@@ -816,7 +830,7 @@ export async function scrollToTab(tab, options = {}) {
     }
     await scrollTo({
       ...options,
-      position: scrollBox.scrollTop + delta,
+      position: scrollBox.$scrollTop + delta,
     });
   }
   else {
@@ -882,12 +896,12 @@ export function autoScrollOnMouseEvent(event) {
     const tabbarRect = Size.getScrollBoxRect(scrollBox);
     const scrollPixels = Math.round(Size.getRenderedTabHeight() * 0.5);
     if (event.clientY < tabbarRect.top + autoScrollOnMouseEvent.areaSize) {
-      if (scrollBox.scrollTop > 0)
-        scrollBox.scrollTop -= scrollPixels;
+      if (scrollBox.$scrollTop > 0)
+        scrollBox.scrollTop = (scrollBox.$scrollTop -= scrollPixels);
     }
     else if (event.clientY > tabbarRect.bottom - autoScrollOnMouseEvent.areaSize) {
-      if (scrollBox.scrollTop < scrollBox.scrollTopMax)
-        scrollBox.scrollTop += scrollPixels;
+      if (scrollBox.$scrollTop < scrollBox.$scrollTopMax)
+        scrollBox.scrollTop = (scrollBox.$scrollTop += scrollPixels);
     }
   });
 }
@@ -956,6 +970,8 @@ async function onWheel(event) {
 
 function onScroll(event) {
   const scrollBox = event.currentTarget;
+  scrollBox.$scrollTop = scrollBox.scrollTop;
+  scrollBox.$scrollTopMax = scrollBox.scrollTopMax;
   reserveToUpdateScrolledState(scrollBox);
   if (scrollBox == mNormalScrollBox) {
     reserveToRenderVirtualScrollViewport({ trigger: 'scroll' });
@@ -978,8 +994,8 @@ function reserveToUpdateScrolledState(scrollBox) {
     if (scrollBox.__reserveToUpdateScrolledState_lastStartedAt != startAt) // eslint-disable-line no-underscore-dangle
       return;
 
-    const scrolled = scrollBox.scrollTop > 0;
-    const fullyScrolled = scrollBox.scrollTop == scrollBox.scrollTopMax;
+    const scrolled = scrollBox.$scrollTop > 0;
+    const fullyScrolled = scrollBox.$scrollTop == scrollBox.$scrollTopMax;
     scrollBox.classList.toggle(Constants.kTABBAR_STATE_SCROLLED, scrolled);
     scrollBox.classList.toggle(Constants.kTABBAR_STATE_FULLY_SCROLLED, fullyScrolled);
 
@@ -1000,7 +1016,7 @@ function reserveToSaveScrollPosition() {
     browser.sessions.setWindowValue(
       TabsStore.getCurrentWindowId(),
       Constants.kWINDOW_STATE_SCROLL_POSITION,
-      mNormalScrollBox.scrollTop
+      mNormalScrollBox.$scrollTop
     ).catch(ApiTabs.createErrorSuppressor());
   }, 150);
 }
@@ -1126,7 +1142,7 @@ async function onBackgroundMessage(message) {
               break;
 
             case 'bottom':
-              smoothScrollTo({ position: scrollBox.scrollTopMax });
+              smoothScrollTo({ position: scrollBox.$scrollTopMax });
               break;
           }
           break;
@@ -1324,10 +1340,10 @@ export function tryLockPosition(tabIds, reason) {
   }
 
   // Lock scroll position only when the closing affects to the max scroll position.
-  if (mNormalScrollBox.scrollTop < mNormalScrollBox.scrollTopMax - Size.getRenderedTabHeight() - mNormalScrollBox.querySelector(`.${Constants.kTABBAR_SPACER}`).offsetHeight) {
+  if (mNormalScrollBox.$scrollTop < mNormalScrollBox.$scrollTopMax - Size.getRenderedTabHeight() - mNormalScrollBox.querySelector(`.${Constants.kTABBAR_SPACER}`).offsetHeight) {
     log('tryLockPosition: scroll position is not affected ', tabIds, {
-      scrollTop: mNormalScrollBox.scrollTop,
-      scrollTopMax: mNormalScrollBox.scrollTopMax,
+      scrollTop: mNormalScrollBox.$scrollTop,
+      scrollTopMax: mNormalScrollBox.$scrollTopMax,
       height: Size.getRenderedTabHeight(),
     });
     return;
