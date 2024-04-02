@@ -1995,7 +1995,7 @@ export default class Tab {
         this.$exportedForAPIWithPermissions.has(permissionsKey))
       return this.$exportedForAPIWithPermissions.get(permissionsKey);
 
-    let exportedTab = configs.cacheAPITreeItems ? this.$exportedForAPI : null;
+    let exportedTab = configs.cacheAPITreeItems && light ? this.$exportedForAPI : null;
     let favIconUrl;
     if (!exportedTab) {
       const [effectiveFavIconUrl, children] = await Promise.all([
@@ -2031,7 +2031,7 @@ export default class Tab {
         ancestorTabIds: this.tab.$TST.ancestorIds,
         bundledTabId:   this.tab.$TST.bundledTabId,
       };
-      if (configs.cacheAPITreeItems)
+      if (configs.cacheAPITreeItems && light)
         this.$exportedForAPI = exportedTab;
     }
 
