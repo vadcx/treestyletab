@@ -34,6 +34,7 @@ let mFavIconizedTabHeight = 0;
 let mFavIconizedTabXOffset = 0;
 let mFavIconizedTabYOffset = 0;
 let mPinnedTabsScrollBoxRect;
+let mPinnedTabsContainerWidth
 let mNormalTabsScrollBoxRect;
 let mNormalTabsViewPortSize = 0;
 
@@ -93,6 +94,10 @@ export function getScrollBoxRect(scrollBox) {
 
 export function getNormalTabsViewPortSize() {
   return mNormalTabsViewPortSize;
+}
+
+export function getPinnedTabsContainerWidth() {
+  return mPinnedTabsContainerWidth;
 }
 
 export function init() {
@@ -193,6 +198,9 @@ export function updateTabs() {
 export function updateContainers() {
   mPinnedTabsScrollBoxRect = mPinnedScrollBox.getBoundingClientRect();
   mNormalTabsScrollBoxRect = mNormalScrollBox.getBoundingClientRect();
+
+  const pinnedContainerStyle = window.getComputedStyle(mPinnedScrollBox, null);
+  mPinnedTabsContainerWidth = mPinnedTabsScrollBoxRect.width - parseFloat(pinnedContainerStyle.paddingLeft) - parseFloat(pinnedContainerStyle.borderLeftWidth) - parseFloat(pinnedContainerStyle.paddingRight) - parseFloat(pinnedContainerStyle.borderRightWidth);
 
   const range = document.createRange();
   //range.selectNodeContents(mTabBar);
