@@ -1,6 +1,15 @@
 # History
 
  - master/HEAD
+ - 4.0.11 (2024.4.3)
+   * Optimize tab rendering more.
+   * Optimize updating of tab indentations on animation-disabled mode.
+   * Never show different "extra tab contents" in reused tab elements.
+   * Show favicon of a tab correctly when a favicon-less page is loaded.
+   * Apply the behavior option correctly to group tabs opened for tabs from bookmarks.
+   * Allow to set details options about tab rendering per each device.
+   * API: Cache tabs returned via API for better performance. It is disabled by default via an option `cacheAPITreeItems`.
+   * API: Show extra tab contents on the target pinned tab correctly.
  - 4.0.10 (2024.3.21)
    * Don't shift tree structure after a restart for a major update of Firefox (See also: [how to restore correct tree from shifted tree](https://github.com/piroor/treestyletab/issues/3504#issuecomment-2010003298))
    * Show context menu items enabled by the option correctly.
