@@ -1129,7 +1129,7 @@ tab-item.faviconized .contextual-identity-marker {
 
 #notifications {
   background: var(--tab-surface, var(--bg-color));
-  bottom: 0;
+  bottom: var(--subpanel-area-size);
   color: var(--tab-text);
   font-size: var(--svg-small-icon-size);
   height: calc(var(--svg-small-icon-size) * 1.5);
