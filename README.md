@@ -177,7 +177,14 @@ Please remind that some existing features or options may violate this policy due
 * <details id="appearance-how-to-hide-the-top-tab-bar-horizontal-tab-strip"><summary>How to hide the top tab bar (horizontal tab strip)?</summary>
   
   As a workaround, you can [create a `userChrome.css` file.](https://github.com/piroor/treestyletab/wiki/Code-snippets-for-custom-style-rules#for-userchromecss)
-  But please remind that I - the original author of TST - never recommend such an usage, because TST doesn't cover full features of the native tabs due to restrictions of WebExtensions API so *some tab features become inaccessible*, and I also believe that TST is not enough stable to replace Firefox's tab bar completely.
+  But please remind that I - the original author of TST - never recommend such an usage, because TST doesn't cover full features of the native tabs due to restrictions of WebExtensions API so *some tab features become inaccessible*:
+  
+  * "Autoplay blocked" message and the "Play tab" button image
+    ![(screenshot)](./screenshots/native-tabs.png)
+  * "Share" tab context menu command
+  * "Send Tab to Device" tab context menu command. (TST currently simulates it but you cannot send tabs to mobile devices.)
+  
+  and I also believe that TST is not enough stable to replace Firefox's tab bar completely.
   Thus I usually use TST together with horizontal tab bar for safety.
   
   If I hid the tab bar on my environment in my daily use, I might maintain the userChrome.css hack by myself, but actually I don't do that.
