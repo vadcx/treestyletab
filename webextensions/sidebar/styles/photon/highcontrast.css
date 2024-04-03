@@ -15,7 +15,7 @@
   --tab-text-active: HighlightText;
   --tab-text-hover: ButtonText;
   --tab-text-inverted: CaptionText;
-  --tab-border: ButtonShadow;
+  --tab-border: ButtonText;
   --tab-dropmarker: ButtonText;
 }
 
