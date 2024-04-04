@@ -114,6 +114,10 @@ export function init() {
   });
 }
 
+export function clear() {
+  document.querySelector('#size-definition').textContent = '';
+}
+
 export function updateTabs() {
   // first, calculate actual favicon size.
   mFavIconSize = document.querySelector('#dummy-favicon-size-box').offsetHeight;

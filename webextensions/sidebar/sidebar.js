@@ -396,6 +396,8 @@ async function applyOwnTheme(style) {
 const CSS_SPECIFICITY_INCREASER = ':not(#___NEVER___#___USED___#___ID___)';
 
 function applyUserStyleRules() {
+  Size.clear();
+
   mUserStyleRules.textContent = loadUserStyleRules();
 
   // Simple selectors in user styles may have specificity lower than the one of
