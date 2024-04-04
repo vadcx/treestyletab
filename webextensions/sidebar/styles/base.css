@@ -117,6 +117,7 @@ tab-item.faviconized {
   --attention-marker-y-offset: calc(0px - ((var(--tab-current-size) - var(--favicon-size)) / 2) + ((var(--tab-current-size) - var(--faviconized-tab-size))));
 }
 
+#dummy-tabs tab-item,
 #normal-tabs-container tab-item,
 #normal-tabs-container .sticky-tab-spacer {
   height: var(--tab-size); /* make tab height consistent even if only some tabs have extra contents */
