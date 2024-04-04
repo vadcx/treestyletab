@@ -10,7 +10,7 @@
 :root {
   /* default size, they will be overridden. */
   --favicon-size: 16px;
-  --tab-size: 32px;
+  --tab-size: unset;
   --tab-indent: 0px;
   --tab-margin-bottom: 0px;
   --tab-margin-left: 0px;
