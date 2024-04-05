@@ -115,9 +115,11 @@ export function init(scrollPosition) {
   if (typeof scrollPosition != 'number')
     return;
 
-  mNormalScrollBox.scrollTop = mNormalScrollBox.$scrollTop = scrollPosition;
-  if (scrollPosition <= mNormalScrollBox.$scrollTopMax)
+  if (scrollPosition <= mNormalScrollBox.$scrollTopMax) {
+    mNormalScrollBox.scrollTop =
+      mNormalScrollBox.$scrollTop = Math.max(0, scrollPosition);
     return;
+  }
 
   mScrollingInternallyCount++;
   restoreScrollPosition.scrollPosition = scrollPosition;
@@ -155,7 +157,12 @@ function restoreScrollPosition() {
     return window.requestAnimationFrame(restoreScrollPosition);
   }
 
-  mNormalScrollBox.scrollTop = mNormalScrollBox.$scrollTop = restoreScrollPosition.scrollPosition;
+  if (restoreScrollPosition.scrollPosition <= mNormalScrollBox.$scrollTopMax)
+    mNormalScrollBox.scrollTop =
+      mNormalScrollBox.$scrollTop = Math.max(
+        0,
+        restoreScrollPosition.scrollPosition
+      );
   restoreScrollPosition.scrollPosition = -1;
   window.requestAnimationFrame(() => {
     mScrollingInternallyCount--;
@@ -230,7 +237,7 @@ function renderVirtualScrollViewport(scrollPosition = undefined) {
   allTabsSizeHolder.$lastHeight = allRenderableTabsSize;
   if (resized) {
     mNormalScrollBox.$offsetHeight = mNormalScrollBox.offsetHeight;
-    mNormalScrollBox.$scrollTopMax = /*mNormalScrollBox.scrollTopMax*/allRenderableTabsSize - viewPortSize;
+    mNormalScrollBox.$scrollTopMax = /*mNormalScrollBox.scrollTopMax*/Math.max(0, allRenderableTabsSize - viewPortSize);
   }
 
   const renderablePaddingSize = staticRendering ?
@@ -575,7 +582,11 @@ function scrollTo(params = {}) {
   // render before scroll, to prevent showing blank area
   mScrollingInternallyCount++;
   renderVirtualScrollViewport(scrollTop);
-  scrollBox.scrollTop = scrollBox.$scrollTop = scrollTop;
+  scrollBox.scrollTop =
+    scrollBox.$scrollTop = Math.min(
+      scrollBox.$scrollTopMax,
+      Math.max(0, scrollTop)
+    );
   window.requestAnimationFrame(() => {
     mScrollingInternallyCount--;
   });
@@ -901,11 +912,25 @@ export function autoScrollOnMouseEvent(event) {
     const scrollPixels = Math.round(Size.getRenderedTabHeight() * 0.5);
     if (event.clientY < tabbarRect.top + autoScrollOnMouseEvent.areaSize) {
       if (scrollBox.$scrollTop > 0)
-        scrollBox.scrollTop = (scrollBox.$scrollTop -= scrollPixels);
+        scrollBox.scrollTop =
+          scrollBox.$scrollTop = Math.min(
+            scrollBox.$scrollTopMax,
+            Math.max(
+              0,
+              scrollBox.$scrollTop - scrollPixels
+            )
+          );
     }
     else if (event.clientY > tabbarRect.bottom - autoScrollOnMouseEvent.areaSize) {
       if (scrollBox.$scrollTop < scrollBox.$scrollTopMax)
-        scrollBox.scrollTop = (scrollBox.$scrollTop += scrollPixels);
+        scrollBox.scrollTop =
+          scrollBox.$scrollTop = Math.min(
+            scrollBox.$scrollTopMax,
+            Math.max(
+              0,
+              scrollBox.$scrollTop + scrollPixels
+            )
+          );
     }
   });
 }
@@ -974,8 +999,8 @@ async function onWheel(event) {
 
 function onScroll(event) {
   const scrollBox = event.currentTarget;
-  scrollBox.$scrollTop = scrollBox.scrollTop;
   scrollBox.$scrollTopMax = scrollBox.scrollTopMax;
+  scrollBox.$scrollTop = Math.min(scrollBox.$scrollTopMax, scrollBox.scrollTop);
   reserveToUpdateScrolledState(scrollBox);
   if (scrollBox == mNormalScrollBox) {
     reserveToRenderVirtualScrollViewport({ trigger: 'scroll' });
