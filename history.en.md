@@ -1,6 +1,11 @@
 # History
 
  - master/HEAD
+ - 4.0.12 (2024.4.5)
+   * Calculate tab dimensions more correctly. (regression on 4.0.11)
+   * Fix ability to override tab size with `--tab-size`.
+   * Use `ButtonText` instead of `ButtonShadow` as the tabs border color in the "High Contrast" theme, for better visibility.
+   * Don't apply new-tab-command-tab behavior for non-new-tab-command-tabs accidentally, e.g. tabs opened by other applications.
  - 4.0.11 (2024.4.3)
    * Optimize tab rendering more.
    * Optimize updating of tab indentations on animation-disabled mode.
