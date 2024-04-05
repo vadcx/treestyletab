@@ -114,12 +114,12 @@
     <div id="notifications" class="vbox"></div>
     <div id="background"></div><!-- This is required to hide dummy elements without offscreen rendering outside of the viewport. See also: https://github.com/piroor/treestyletab/issues/1703#issuecomment-354646405 -->
     <ul id="dummy-tabs">
-      <span id="dummy-favicon-size-box"></span>
-      <span id="dummy-tab-color-box"></span>
-      <span id="dummy-highlight-color-box"></span>
-      <span id="dummy-shift-tabs-for-scrollbar-distance-box"></span>
-      <span class="throbber"><span id="sync-throbber"></span></span>
-      <tab-item id="dummy-tab" class="tab">
+      <span id="dummy-favicon-size-box" class="dummy"></span>
+      <span id="dummy-tab-color-box" class="dummy"></span>
+      <span id="dummy-highlight-color-box" class="dummy"></span>
+      <span id="dummy-shift-tabs-for-scrollbar-distance-box" class="dummy"></span>
+      <span class="throbber dummy"><span id="sync-throbber"></span></span>
+      <tab-item id="dummy-tab" class="tab dummy">
         <span class="extra-items-container indent"></span>
         <tab-item-substance>
           <tab-twisty class="twisty"></tab-twisty>
@@ -137,7 +137,25 @@
           </span>
         </tab-item-substance>
       </tab-item>
-      <tab-item id="dummy-faviconized-tab" class="tab faviconized">
+      <tab-item id="dummy-sizer-tab" class="tab">
+        <span class="extra-items-container indent"></span>
+        <tab-item-substance>
+          <tab-twisty class="twisty"></tab-twisty>
+          <span class="ui">
+            <span class="extra-items-container above"></span>
+            <span class="caption">
+              <tab-favicon class="favicon"><span class="throbber" id="conductor-throbber-container"><span id="conductor-throbber"></span></span></tab-favicon>
+              <tab-label class="label" value="-"></tab-label>
+              <tab-counter class="counter">0</tab-counter>
+              <tab-closebox class="close-box"></tab-closebox>
+              <span class="extra-items-container behind"></span>
+              <span class="extra-items-container front"></span>
+            </span>
+            <span class="extra-items-container below"></span>
+          </span>
+        </tab-item-substance>
+      </tab-item>
+      <tab-item id="dummy-faviconized-tab" class="tab faviconized dummy">
         <span class="extra-items-container indent"></span>
         <tab-item-substance>
           <tab-twisty class="twisty"></tab-twisty>

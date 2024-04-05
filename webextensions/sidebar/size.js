@@ -145,8 +145,6 @@ export function updateTabs() {
     favIconizedMarginTop + favIconizedMarginBottom;
 
   const dummyTab = document.querySelector('#dummy-tab');
-  const dummyTabRect = dummyTab.getBoundingClientRect();
-  mTabHeight = dummyTabRect.height;
   const tabStyle  = window.getComputedStyle(dummyTab);
   mTabXOffset = parseFloat(tabStyle.marginLeft) + parseFloat(tabStyle.marginRight);
   // simulating margin collapsing
@@ -169,11 +167,12 @@ export function updateTabs() {
   if (shiftTabsForScrollbarDistance == '0')
     shiftTabsForScrollbarDistance += 'px'; // it is used with CSS calc() and it requires any length unit for each value.
 
-  log('mTabHeight ', mTabHeight);
+  // Phase 1: setting `--tab-size` based on the auto-calculated height of the
+  // dummy tab, which may be expanded by inserted extra tab contents.
   const baseLeft  = substanceRect.left;
   const baseRight = substanceRect.right;
   sizeDefinition += `:root {
-    --tab-size: ${mTabHeight}px;
+    --tab-size: ${dummyTab.offsetHeight}px;
     --tab-substance-size: ${substanceRect.height}px;
     --tab-ui-size: ${uiRect.height}px;
     --tab-caption-size: ${captionRect.height}px;
@@ -197,11 +196,27 @@ export function updateTabs() {
   }`;
 
   const sizeDefinitionHolder = document.querySelector('#size-definition');
-  if (sizeDefinitionHolder.textContent == sizeDefinition)
-    return;
+  const modifiedAtPhase1 = sizeDefinitionHolder.textContent != sizeDefinition;
+  if (modifiedAtPhase1)
+    sizeDefinitionHolder.textContent = sizeDefinition;
 
-  sizeDefinitionHolder.textContent = sizeDefinition
-  onUpdated.dispatch();
+  // Phase 2: setting `--tab-size` again based on the "sizer" dummy tab.
+  // In general cases it is sized by the `--tab-size` defined at the phase 1,
+  // but tab size defined in the user style sheet is always preferred to it.
+  // The customized tab height is applied only to the "sizer" dummy.
+  // As the result, TST treats the priority of tab size as:
+  //   user-defined tab size (never expanded by extra tab contents)
+  //     > auto-calculated tab size (may be expanded by extra tab contents)
+  //     > initial tab size
+  mTabHeight = document.querySelector('#dummy-sizer-tab').offsetHeight;
+  log('mTabHeight ', mTabHeight);
+  const finalSizeDefinition = sizeDefinition.replace(/--tab-size:[^;]+;/, `--tab-size: ${mTabHeight}px;`);
+  const modifiedAtPhase2 = sizeDefinitionHolder.textContent != finalSizeDefinition;
+  if (modifiedAtPhase2)
+    sizeDefinitionHolder.textContent = finalSizeDefinition;
+
+  if (modifiedAtPhase1 || modifiedAtPhase2)
+    onUpdated.dispatch();
 }
 
 export function updateContainers() {
