@@ -220,6 +220,8 @@ export default class Tab {
           this._promisedElementResolver = resolve;
         });
       }
+      if (!this.tab) // unbound while waiting!
+        return;
       Tab.onElementBound.dispatch(this.tab);
     }, 0);
   }
