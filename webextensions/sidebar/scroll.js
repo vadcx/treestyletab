@@ -540,6 +540,14 @@ export function getTabRect(tab) {
       index = renderableTabs.length;
   }
   const tabTop = Size.getRenderedTabHeight() * index + scrollBoxRect.top - scrollBox.$scrollTop;
+  /*
+  console.log('coordinates of tab rect ', {
+    index,
+    renderableTabHeight: Size.getRenderedTabHeight(),
+    scrollBox_rectTop: scrollBoxRect.top,
+    scrollBox_$scrollTop: scrollBox.$scrollTop,
+  });
+  */
   return {
     top:    tabTop,
     bottom: tabTop + tabSize,

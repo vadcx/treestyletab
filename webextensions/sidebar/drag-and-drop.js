@@ -51,6 +51,7 @@ import * as TSTAPI from '/common/tst-api.js';
 import Tab from '/common/Tab.js';
 
 import * as Notifications from './notifications.js';
+//import * as Size from './size.js';
 
 function log(...args) {
   internalLogger('sidebar/drag-and-drop', ...args);
@@ -347,11 +348,17 @@ function getDropAction(event) {
     beforeOrAfterDropAreaSize = Math.round(targetTabSize / 4);
   }
   const eventCoordinate = onFaviconizedTab ? event.clientX : event.clientY;
-  //log('coordinates: ', {
-  //  event: eventCoordinate,
-  //  targetTab: targetTabCoordinate,
-  //  area: beforeOrAfterDropAreaSize
-  //});
+  /*
+  log('coordinates: ', {
+    event: eventCoordinate,
+    targetTab: targetTabCoordinate,
+    targetTabActual: configs.debug && (targetTab?.$TST.element?.offsetTop + Size.getScrollBoxRect().top),
+    targetTabSize,
+    area: beforeOrAfterDropAreaSize,
+    before: `< ${targetTabCoordinate + beforeOrAfterDropAreaSize}`,
+    after: `> ${targetTabCoordinate + targetTabSize - beforeOrAfterDropAreaSize}`,
+  });
+  */
   if (eventCoordinate < targetTabCoordinate + beforeOrAfterDropAreaSize) {
     info.dropPosition = kDROP_BEFORE;
     info.insertBefore = info.firstTargetTab;
