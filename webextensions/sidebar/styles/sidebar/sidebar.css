@@ -55,6 +55,8 @@
 
   --multiselected-color: var(--tab-surface-active-gradient);
   --multiselected-color-opacity: 0.35;
+
+  --tab-vertical-padding: 0.075em; /* We should define this as a variable to reuse calculation of extra tab contents size. */
 }
 
 tab-item:not(.active) {
@@ -122,7 +124,7 @@ body,
 tab-item-substance {
   border-top: 1px solid transparent;
   min-height: 2.2em;     /* height including border! */
-  padding: 0.075em 3px 0.075em 2px;
+  padding: var(--tab-vertical-padding) 3px var(--tab-vertical-padding) 2px;
   z-index: 0;
 }
 

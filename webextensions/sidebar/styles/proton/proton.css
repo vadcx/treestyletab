@@ -8,6 +8,7 @@
 
 :root {
   --color-animation: 0s ease-out;
+  --tab-vertical-padding: 0.45em; /* We should define this as a variable to reuse calculation of extra tab contents size. */
   --tab-border-radius-size: 0.35em;
   --tab-dropshadow-blur: 0.4em;
   --tab-dropshadow-padding: 0.2em;
@@ -210,7 +211,7 @@ tab-item:not(.active):not(.bundled-active):not(.highlighted):hover,
 }
 
 tab-item-substance {
-  padding: 0.45em 0.25em;
+  padding: var(--tab-vertical-padding) 0.25em;
   /* Transparent tabs are shown above solid tabs.
      We have to set z-index to show all tabs in the same layer. */
   z-index: auto;

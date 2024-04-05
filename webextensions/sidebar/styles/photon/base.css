@@ -4,12 +4,16 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+:root {
+  --tab-vertical-padding: 0.3em; /* We should define this as a variable to reuse calculation of extra tab contents size. */
+}
+
 tab-item-substance,
 .after-tabs button,
 .after-tabs [role="button"] {
   border: 1px solid var(--tab-border);
   border-width: 1px 0;
-  padding: 0.3em 0.25em;
+  padding: var(--tab-vertical-padding) 0.25em;
 }
 tab-item,
 .after-tabs button,
