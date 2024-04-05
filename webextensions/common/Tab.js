@@ -397,21 +397,28 @@ export default class Tab {
     if (this.tab.$isNewTabCommandTab)
       return true;
 
-    if (isNewTabCommandTab(this.tab))
+    // Firefox sets "New Tab" title to a new tab command tab, even if
+    // "Blank Page" is chosen as the new tab page. So we can detect the case
+    // safely here.
+    // (confirmed on Firefox 124)
+    if (isNewTabCommandTab(this.tab.url))
       return true;
 
     // Firefox always opens a blank tab as the placeholder, when trying to
-    // open a bookmark in a new tab. So, we cannot determine is the tab
-    // really opened as a new blank tab or just as a placeholder for an
-    // "Open in New Tab" operation, when the user choose the "Blank Page"
-    // as the new tab page.
+    // open a bookmark in a new tab. So, we cannot determine the tab is
+    // "really opened as a new blank tab" or "just as a placeholder for an
+    // Open in New Tab operation", when the user choose the "Blank Page"
+    // as the new tab page and the new tab page is opened without the title
+    // "New Tab" due to any reason.
     // But, when "Blank Page" is chosen as the new tab page, Firefox loads
     // "about:blank" into a newly opened blank tab. As the result both current
     // URL and the previous URL become "about:blank". This is an important
     // difference between "a new blank tab" and "a blank tab opened for an
     // Open in New Tab command".
-    if (this.tab.url == 'about:blank')
-      return this.tab.previousUrl == 'about:blank';
+    // (confirmed on Firefox 124)
+    if (this.tab.url == 'about:blank' &&
+        this.tab.previousUrl != 'about:blank')
+      return false;
 
     return false;
   }
