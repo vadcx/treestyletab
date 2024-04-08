@@ -291,7 +291,8 @@ async function tryHighlightBundledTab(tab, { shouldSkipCollapsed, allowed, silen
   await wait(100);
   if (!tab.active || // ignore tab already inactivated while waiting
       tab.$TST.hasOtherHighlighted || // ignore manual highlighting
-      bundledTab.pinned)
+      bundledTab.pinned ||
+      !configs.syncActiveStateToBundledTabs)
     return;
 
   if (bundledTab.$TST.hasChild &&

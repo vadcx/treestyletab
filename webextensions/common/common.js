@@ -281,6 +281,7 @@ export const configs = new Configs({
   fixupOrderOfTabsFromOtherDevice: true,
 
   scrollToExpandedTree: true,
+  syncActiveStateToBundledTabs: true,
 
   spreadMutedStateOnlyToSoundPlayingTabs: true,
 

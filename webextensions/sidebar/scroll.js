@@ -1239,6 +1239,10 @@ async function onBackgroundMessage(message) {
           tab.active)
         break;
       const bundled = message.add.includes(Constants.kTAB_STATE_BUNDLED_ACTIVE);
+      if (bundled &&
+          (!configs.scrollToExpandedTree ||
+           !configs.syncActiveStateToBundledTabs))
+        break;
       const activeTab = bundled ?
         tab.$TST.bundledTab : // bundled-active state may be applied before the bundled tab become active
         Tab.getActiveTab(tab.windowId);
