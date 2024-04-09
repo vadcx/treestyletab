@@ -1,6 +1,11 @@
 # History
 
  - master/HEAD
+   * "Move Tab" => "Move to New Window" in the context menu on the sidebar now moves whole tree always.
+   * "Move Tab" => "Move to New Window" opens a new window shifted from the source window a little.
+   * Don't deactivate unrelated options even if `<all_urls>` permission is not granted.
+   * Fix unexpected reloading of the sidebar panel on tab attaching/detaching.
+   * Add a new secret option `syncActiveStateToBundledTabs` to suppress expanding of the tree and scrolling to it for group tabs bundled to a pinned tab, when the pinned tab become active.
  - 4.0.12 (2024.4.5)
    * Calculate tab dimensions more correctly. (regression on 4.0.11)
    * Fix ability to override tab size with `--tab-size`.
