@@ -936,6 +936,9 @@ export async function openTabInWindow(tab, options = {}) {
   if (options.multiselected !== false && tab.$TST.multiselected) {
     return openTabsInWindow(Tab.getSelectedTabs(tab.windowId));
   }
+  else if (options.withTree) {
+    return openTabsInWindow([tab, ...tab.$TST.descendants]);
+  }
   else {
     const sourceWindow = await browser.windows.get(tab.windowId);
     const sourceParams = getWindowParamsFromSource(sourceWindow, options);

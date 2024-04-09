@@ -1220,7 +1220,7 @@ async function onClick(info, contextTab) {
       Commands.moveTabToEnd(contextTab);
       break;
     case 'context_openTabInWindow':
-      Commands.openTabInWindow(contextTab);
+      Commands.openTabInWindow(contextTab, { withTree: true });
       break;
     case 'context_shareTabURL':
       if (mSharingService)
