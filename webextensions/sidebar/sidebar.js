@@ -591,12 +591,18 @@ const mImportedTabs = new Promise((resolve, _reject) => {
   log('preparing mImportedTabs');
   // This must be synchronous , to avoid blocking to other listeners.
   const onBackgroundIsReady = message => {
+    if (mGiveUpImportTabs) {
+      log('mImportedTabs (${windowId}): give up to import, unregister onBackgroundIsReady listener');
+      browser.runtime.onMessage.removeListener(onBackgroundIsReady);
+      resolve([]);
+      return;
+    }
     // This handler may be called before mTargetWindow is initialized, so
     // we need to wait until it is resolved.
     // See also: https://github.com/piroor/treestyletab/issues/2200
     mPromisedTargetWindow.then(windowId => {
       if (mGiveUpImportTabs) {
-        log('mImportedTabs (${windowId}): give up to import, unregister onBackgroundIsReady listener');
+        log('mImportedTabs (${windowId}): give up to import, unregister onBackgroundIsReady listener (with promised target window)');
         browser.runtime.onMessage.removeListener(onBackgroundIsReady);
         resolve([]);
         return;
