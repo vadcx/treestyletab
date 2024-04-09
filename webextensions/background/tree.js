@@ -1657,10 +1657,13 @@ export async function openNewWindowFromTabs(tabs, options = {}) {
 
   log('openNewWindowFromTabs: ', tabs, options);
   const sourceWindow = await browser.windows.get(tabs[0].windowId);
+  const sourceParams = getWindowParamsFromSource(sourceWindow, options);
   const windowParams = {
     //active: true,  // not supported in Firefox...
     url:       'about:blank',
-    ...getWindowParamsFromSource(sourceWindow, options),
+    ...sourceParams,
+    left: sourceParams.left + 20,
+    top:  sourceParams.top + 20,
   };
   let newWindow;
   const promsiedNewWindow = browser.windows.create(windowParams)
