@@ -938,10 +938,13 @@ export async function openTabInWindow(tab, options = {}) {
   }
   else {
     const sourceWindow = await browser.windows.get(tab.windowId);
+    const sourceParams = getWindowParamsFromSource(sourceWindow, options);
     const windowParams = {
       //active: true,  // not supported in Firefox...
       tabId:     tab.id,
-      ...getWindowParamsFromSource(sourceWindow, options),
+      ...sourceParams,
+      left: sourceParams.left + 20,
+      top:  sourceParams.top + 20,
     };
     const win = await browser.windows.create(windowParams).catch(ApiTabs.createErrorHandler());
     return win.id;
