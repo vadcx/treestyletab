@@ -125,10 +125,10 @@ export function calculateReferenceTabsFromInsertionPosition(
   const firstTab = (Array.isArray(tab) ? tab[0] : tab) || tab;
   const lastTab  = (Array.isArray(tab) ? tab[tab.length - 1] : tab) || tab;
   log('calculateReferenceTabsFromInsertionPosition ', {
-    firstTab:     firstTab && firstTab.id,
-    lastTab:      lastTab && lastTab.id,
-    insertBefore: insertBefore && insertBefore.id,
-    insertAfter : insertAfter && insertAfter.id
+    firstTab:     firstTab?.id,
+    lastTab:      lastTab?.id,
+    insertBefore: insertBefore?.id,
+    insertAfter : insertAfter?.id
   });
   if (insertBefore) {
     /* strategy for moved case
@@ -180,7 +180,7 @@ export function calculateReferenceTabsFromInsertionPosition(
       log('calculateReferenceTabsFromInsertionPosition: from insertBefore, CASE 1/5');
       // allow to move pinned tab to beside of another pinned tab
       if (!firstTab ||
-          firstTab.pinned == (insertBefore && insertBefore.pinned)) {
+          firstTab.pinned == insertBefore?.pinned) {
         return {
           insertBefore
         };
@@ -190,8 +190,8 @@ export function calculateReferenceTabsFromInsertionPosition(
       }
     }
     else {
-      const prevLevel   = Number(prevTab.$TST.getAttribute(Constants.kLEVEL) || 0);
-      const targetLevel = Number(insertBefore.$TST.getAttribute(Constants.kLEVEL) || 0);
+      const prevLevel   = Number(prevTab?.$TST?.getAttribute(Constants.kLEVEL) || 0);
+      const targetLevel = Number(insertBefore?.$TST?.getAttribute(Constants.kLEVEL) || 0);
       let parent = null;
       if (!firstTab || !firstTab.pinned) {
         if (prevLevel < targetLevel) {
@@ -201,18 +201,18 @@ export function calculateReferenceTabsFromInsertionPosition(
           }
           else {
             log('calculateReferenceTabsFromInsertionPosition: from insertBefore, CASE 8, prevTab = ', prevTab);
-            parent = (firstTab && firstTab.$TST.parent != prevTab) ? prevTab : null;
+            parent = (firstTab?.$TST?.parent != prevTab) ? prevTab : null;
           }
         }
         else {
-          const possibleParent = insertBefore && insertBefore.$TST.parent;
+          const possibleParent = insertBefore?.$TST?.parent;
           if (context == Constants.kINSERTION_CONTEXT_MOVED || prevLevel == targetLevel) {
             log('calculateReferenceTabsFromInsertionPosition: from insertBefore, CASE 2/3/7');
             parent = possibleParent;
           }
           else {
             log('calculateReferenceTabsFromInsertionPosition: from insertBefore, CASE 6');
-            parent = firstTab && (firstTab.$TST.parent != possibleParent && possibleParent || firstTab.$TST.parent);
+            parent = firstTab?.$TST?.parent != possibleParent && possibleParent || firstTab?.$TST?.parent;
           }
         }
       }
@@ -264,24 +264,23 @@ export function calculateReferenceTabsFromInsertionPosition(
     */
     // We need to refer unsafeNearestExpandedFollowingTab instead of a visible tab, to avoid
     // placing the tab after hidden tabs (it is too far from the target).
-    let unsafeNextTab = insertAfter &&
-      insertAfter.$TST.unsafeNearestExpandedFollowingTab;
+    let unsafeNextTab = insertAfter?.$TST?.unsafeNearestExpandedFollowingTab;
     if (firstTab && unsafeNextTab == firstTab) // failsafe
-      unsafeNextTab = lastTab && lastTab.$TST.unsafeNearestExpandedFollowingTab;
+      unsafeNextTab = lastTab?.$TST?.unsafeNearestExpandedFollowingTab;
     let nextTab = insertAfter &&
       (configs.fixupTreeOnTabVisibilityChanged ?
-        insertAfter.$TST.nearestVisibleFollowingTab :
+        insertAfter.$TST?.nearestVisibleFollowingTab :
         unsafeNextTab);
     if (firstTab && nextTab == firstTab) // failsafe
       nextTab = configs.fixupTreeOnTabVisibilityChanged ?
-        (lastTab && lastTab.$TST.nearestVisibleFollowingTab) :
+        lastTab?.$TST?.nearestVisibleFollowingTab :
         unsafeNextTab;
     if (!nextTab) {
       let result;
       if (context == Constants.kINSERTION_CONTEXT_MOVED) {
         log('calculateReferenceTabsFromInsertionPosition: from insertAfter, CASE 1');
         result = {
-          parent:       insertAfter && insertAfter.$TST.parent,
+          parent:       insertAfter?.$TST?.parent,
           insertBefore: unsafeNextTab,
           insertAfter
         };
@@ -289,7 +288,7 @@ export function calculateReferenceTabsFromInsertionPosition(
       else {
         log('calculateReferenceTabsFromInsertionPosition: from insertAfter, CASE 5');
         result = {
-          parent:       firstTab && firstTab.$TST.parent && insertAfter && insertAfter.$TST.parent,
+          parent:       firstTab?.$TST?.parent && insertAfter?.$TST?.parent,
           insertBefore: unsafeNextTab,
           insertAfter
         };
@@ -298,8 +297,8 @@ export function calculateReferenceTabsFromInsertionPosition(
       return result;
     }
     else {
-      const targetLevel = Number(insertAfter.$TST.getAttribute(Constants.kLEVEL) || 0);
-      const nextLevel   = Number(nextTab.$TST.getAttribute(Constants.kLEVEL) || 0);
+      const targetLevel = Number(insertAfter?.$TST?.getAttribute(Constants.kLEVEL) || 0);
+      const nextLevel   = Number(nextTab?.$TST?.getAttribute(Constants.kLEVEL) || 0);
       let parent = null;
       if (!firstTab || !firstTab.pinned) {
         if (targetLevel < nextLevel) {
@@ -307,14 +306,14 @@ export function calculateReferenceTabsFromInsertionPosition(
           parent = insertAfter;
         }
         else  {
-          const possibleParent = insertAfter && insertAfter.$TST.parent;
+          const possibleParent = insertAfter?.$TST?.parent;
           if (context == Constants.kINSERTION_CONTEXT_MOVED || targetLevel == nextLevel) {
             log('calculateReferenceTabsFromInsertionPosition: from insertAfter, CASE 2/3/7');
             parent = possibleParent;
           }
           else {
             log('calculateReferenceTabsFromInsertionPosition: from insertAfter, CASE 6');
-            parent = firstTab && (firstTab.$TST.parent != possibleParent && possibleParent || firstTab.$TST.parent);
+            parent = firstTab?.$TST?.parent != possibleParent && possibleParent || firstTab?.$TST.parent;
           }
         }
       }
