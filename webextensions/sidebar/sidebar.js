@@ -945,6 +945,7 @@ async function onConfigChange(changedKey) {
       break;
 
     case 'style':
+      log('reload for changed style');
       location.reload();
       break;
 
@@ -1057,6 +1058,7 @@ function onMessage(message, _sender, _respond) {
       return Promise.resolve(true);
 
     case Constants.kCOMMAND_RELOAD:
+      log('reload triggered by the reload command');
       location.reload();
       return;
 

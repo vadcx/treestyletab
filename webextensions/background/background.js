@@ -344,6 +344,7 @@ export async function reload(options = {}) {
   for (const win of TabsStore.windows.values()) {
     if (!SidebarConnection.isOpen(win.id))
       continue;
+    log('reload all sidebars: ', new Error().stack);
     browser.runtime.sendMessage({
       type: Constants.kCOMMAND_RELOAD
     }).catch(ApiTabs.createErrorSuppressor());

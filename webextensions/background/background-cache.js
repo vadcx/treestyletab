@@ -131,6 +131,7 @@ export async function restoreWindowFromEffectiveWindowCache(windowId, options = 
     MetricsData.add(`restoreWindowFromEffectiveWindowCache: window ${windowId} succeeded`);
     // Now we reload the sidebar if it is opened, because it is the easiest way
     // to synchronize state of tabs completely.
+    log('reload sidebar for a tree restored from cache');
     browser.runtime.sendMessage({
       type: Constants.kCOMMAND_RELOAD,
       windowId,
