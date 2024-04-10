@@ -1,6 +1,7 @@
 # History
 
  - master/HEAD
+   * Use `GrayText` instead of `ButtonText` as the tabs border color in the "High Contrast" theme, to reduce stresses from too high contrast.
    * "Move Tab" => "Move to New Window" in the context menu on the sidebar now moves whole tree always.
    * "Move Tab" => "Move to New Window" opens a new window shifted from the source window a little.
    * Don't deactivate unrelated options even if `<all_urls>` permission is not granted.
