@@ -142,12 +142,7 @@ export const configs = new Configs({
   sidebarPositionRighsideNotificationShown: false,
   sidebarPositionOptionNotificationTimeout: 20 * 1000,
 
-  style:
-    /^Mac/i.test(navigator.platform) ? 'sidebar' :
-      (() => {
-        const matched = navigator.userAgent.match(/Firefox\/(\d+)\.\d+/);
-        return (matched && parseInt(matched[1]) >= 89) ? 'proton' : 'photon'
-      })(),
+  style: /^Mac/i.test(navigator.platform) ? 'sidebar' : 'proton',
   colorScheme: /^Linux/i.test(navigator.platform) ? 'system-color' : 'photon' ,
   iconColor: 'auto',
   indentLine: 'auto',
