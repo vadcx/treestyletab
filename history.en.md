@@ -1,6 +1,8 @@
 # History
 
  - master/HEAD
+ - 4.0.13 (2024.4.10)
+   * Apply new-tab-command-tab behavior correctly. (regression on 4.0.12)
    * Use `GrayText` instead of `ButtonText` as the tabs border color in the "High Contrast" theme, to reduce stresses from too high contrast.
    * "Move Tab" => "Move to New Window" in the context menu on the sidebar now moves whole tree always.
    * "Move Tab" => "Move to New Window" opens a new window shifted from the source window a little.
