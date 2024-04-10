@@ -15,7 +15,7 @@
   --tab-text-active: HighlightText;
   --tab-text-hover: ButtonText;
   --tab-text-inverted: CaptionText;
-  --tab-border: ButtonText;
+  --tab-border: GrayText; /* it should be between ButtonText and ButtonFace. */
   --tab-dropmarker: ButtonText;
 }
 
