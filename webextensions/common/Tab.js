@@ -401,7 +401,7 @@ export default class Tab {
     // "Blank Page" is chosen as the new tab page. So we can detect the case
     // safely here.
     // (confirmed on Firefox 124)
-    if (isNewTabCommandTab(this.tab.url))
+    if (isNewTabCommandTab(this.tab))
       return true;
 
     // Firefox always opens a blank tab as the placeholder, when trying to
