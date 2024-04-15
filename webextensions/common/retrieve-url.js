@@ -85,8 +85,28 @@ export async function fromDragEvent(event) {
   return sanitizeURLs(urls);
 }
 
-export async function fromClipboard() {
+let mSelectionClipboardProvider = null;
+
+/* provider should have two methods:
+    isAvailable(): returns boolean which indicates the selection clipboard is available or not.
+    getTextData(): returns a string from the selection clipboard.
+*/
+export function registerSelectionClipboardProvider(provider) {
+  mSelectionClipboardProvider = provider;
+}
+
+export async function fromClipboard({ selection } = {}) {
   const urls = [];
+
+  if (selection && mSelectionClipboardProvider) {
+    if (await mSelectionClipboardProvider.isAvailable()) {
+      const maybeUrlString = await mSelectionClipboardProvider.getTextData();
+      if (maybeUrlString)
+        urls.push(...fromData(maybeUrlString, 'text/plain'));
+      return sanitizeURLs(urls);
+    }
+  }
+
   if (!(await Permissions.isGranted(Permissions.CLIPBOARD_READ)) ||
       typeof navigator.clipboard.read != 'function')
     return urls;

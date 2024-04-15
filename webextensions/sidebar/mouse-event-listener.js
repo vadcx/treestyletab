@@ -562,7 +562,7 @@ async function handleDefaultMouseUp({ lastMousedown, tab, event }) {
         const activeTab = Tab.getActiveTab(mTargetWindow);
         const cookieStoreId = (actionForNewTabCommand == Constants.kNEWTAB_OPEN_AS_NEXT_SIBLING_WITH_INHERITED_CONTAINER) ? activeTab.cookieStoreId : null
         const urls = lastMousedown.detail.isMiddleClick && configs.middleClickPasteURLOnNewTabButton ?
-          (await RetrieveURL.fromClipboard()) :
+          (await RetrieveURL.fromClipboard({ selection: true })) :
           [];
         log('urls: ', urls);
         handleNewTabAction(event, {
