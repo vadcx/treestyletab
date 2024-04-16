@@ -40,8 +40,11 @@ SidebarTabs.onReuseTabElement.addListener(tabElement => {
   setExtraTabContentsToElement(tabElement, '*', { place: 'tab-indent' });
   setExtraTabContentsToElement(tabElement, '*', { place: 'tab-front' });
   setExtraTabContentsToElement(tabElement, '*', { place: 'tab-behind' });
-  setExtraTabContentsToElement(tabElement, '*', { place: 'tab-above' });
-  setExtraTabContentsToElement(tabElement, '*', { place: 'tab-below' });
+  // Above/below extra contents need to be inserted here, because missing those
+  // contents will shrink height of the tab and may triggers "underflow" of the
+  // tab bar unexpectedly.
+  setExtraTabContentsToElement(tabElement, '*', { place: 'tab-above', autoReinsert: true });
+  setExtraTabContentsToElement(tabElement, '*', { place: 'tab-below', autoReinsert: true });
 });
 
 const mAddonsWithExtraContents = new Set();
@@ -368,6 +371,15 @@ export function setExtraContentsTo(tab, id, params = {}) {
   setExtraTabContentsToElement(tab.$TST.element, id, params);
 }
 
+function cacheKeyFor(id) {
+  return `$$lastContentsSourceFor_${id}`;
+}
+
+function getCacheHolder(container) {
+  const cacheHolderElement = container?.host?.closest(kTAB_ELEMENT_NAME) || container;
+  return cacheHolderElement.$TST || cacheHolderElement;
+}
+
 function setExtraContentsToContainer(container, id, params = {}) {
   if (id == '*') {
     for (const id of container.itemById.keys()) {
@@ -380,6 +392,10 @@ function setExtraContentsToContainer(container, id, params = {}) {
     params = id;
     id = browser.runtime.id;
   }
+
+  const cacheHolder = params.autoReinsert && getCacheHolder(container);
+  const cacheKey = params.autoReinsert && cacheKeyFor(id);
+
   let item = container.itemById.get(id);
   if (!params.style &&
       item &&
@@ -395,6 +411,8 @@ function setExtraContentsToContainer(container, id, params = {}) {
       container.removeChild(item);
       container.itemById.delete(id);
     }
+    if (params.autoReinsert)
+      cacheHolder[cacheKey] = null;
     return;
   }
 
@@ -414,9 +432,13 @@ function setExtraContentsToContainer(container, id, params = {}) {
     item.styleElement = style;
   }
 
+  const contentsSource = String(params.contents || '').trim();
+  if (params.autoReinsert)
+    cacheHolder[cacheKey] = contentsSource;
+
   const range = document.createRange();
   range.selectNodeContents(item);
-  const contents = range.createContextualFragment(String(params.contents || '').trim());
+  const contents = range.createContextualFragment(contentsSource);
   range.detach();
 
   const dangerousContents = contents.querySelectorAll(DANGEROUS_CONTENTS_SELECTOR);
@@ -498,8 +520,14 @@ function setExtraTabContentsToElement(tabElement, id, params = {}) {
       break;
   }
 
-  if (container)
+  if (container) {
+    if (params.autoReinsert) {
+      const cacheHolder = getCacheHolder(container);
+      const cacheKey = cacheKeyFor(id);
+      params.contents = cacheHolder[cacheKey] || null;
+    }
     return setExtraContentsToContainer(container, id, params);
+  }
 }
 
 function onExtraContentsAboveChanged(id, params) {
@@ -512,7 +540,10 @@ function onExtraContentsAboveChanged(id, params) {
   window.requestAnimationFrame(() => {
     if (onExtraContentsAboveChanged.lastStartedAt != startAt)
       return;
-    setExtraContentsToContainer(mDummyTab.extraItemsContainerAboveRoot, id, params);
+    setExtraContentsToContainer(mDummyTab.extraItemsContainerAboveRoot, id, {
+      ...params,
+      autoReinsert: true,
+    });
     throttledUpdateSize();
   });
 }
@@ -527,7 +558,10 @@ function onExtraContentsBelowChanged(id, params) {
   window.requestAnimationFrame(() => {
     if (onExtraContentsAboveChanged.lastStartedAt != startAt)
       return;
-    setExtraContentsToContainer(mDummyTab.extraItemsContainerBelowRoot, id, params);
+    setExtraContentsToContainer(mDummyTab.extraItemsContainerBelowRoot, id, {
+      ...params,
+      autoReinsert: true,
+    });
     throttledUpdateSize();
   });
 }
