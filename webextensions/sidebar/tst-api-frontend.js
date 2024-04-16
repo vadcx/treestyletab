@@ -30,6 +30,14 @@ function log(...args) {
   internalLogger('sidebar/tst-api-frontend', ...args);
 }
 
+// Above/below extra contents need to be inserted here, because missing those
+// contents will shrink height of the tab and may triggers "underflow" of the
+// tab bar unexpectedly.
+const AUTO_REINSERT_PLACES = new Set([
+  'tab-above',
+  'tab-below',
+]);
+
 let mTargetWindow;
 
 Sidebar.onInit.addListener(() => {
@@ -40,11 +48,8 @@ SidebarTabs.onReuseTabElement.addListener(tabElement => {
   setExtraTabContentsToElement(tabElement, '*', { place: 'tab-indent' });
   setExtraTabContentsToElement(tabElement, '*', { place: 'tab-front' });
   setExtraTabContentsToElement(tabElement, '*', { place: 'tab-behind' });
-  // Above/below extra contents need to be inserted here, because missing those
-  // contents will shrink height of the tab and may triggers "underflow" of the
-  // tab bar unexpectedly.
-  setExtraTabContentsToElement(tabElement, '*', { place: 'tab-above', autoReinsert: true });
-  setExtraTabContentsToElement(tabElement, '*', { place: 'tab-below', autoReinsert: true });
+  setExtraTabContentsToElement(tabElement, '*', { place: 'tab-above' });
+  setExtraTabContentsToElement(tabElement, '*', { place: 'tab-below' });
 });
 
 const mAddonsWithExtraContents = new Set();
@@ -491,8 +496,9 @@ function setExtraTabContentsToElement(tabElement, id, params = {}) {
     params = id;
     id = browser.runtime.id;
   }
+  const place = String(params.place).toLowerCase();
   let container;
-  switch (String(params.place).toLowerCase()) {
+  switch (place) {
     case 'indent': // for backward compatibility
     case 'tab-indent':
       container = tabElement.extraItemsContainerIndentRoot;
@@ -521,10 +527,14 @@ function setExtraTabContentsToElement(tabElement, id, params = {}) {
   }
 
   if (container) {
-    if (params.autoReinsert) {
+    if (AUTO_REINSERT_PLACES.has(place)) {
       const cacheHolder = getCacheHolder(container);
       const cacheKey = cacheKeyFor(id);
-      params.contents = cacheHolder[cacheKey] || null;
+      params = {
+        ...params,
+        contents:     params.contents || cacheHolder[cacheKey] || null,
+        autoReinsert: true,
+      };
     }
     return setExtraContentsToContainer(container, id, params);
   }
