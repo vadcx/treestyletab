@@ -1,6 +1,9 @@
 # History
 
  - master/HEAD
+ - 4.0.14 (2024.4.17)
+   * Allow to detach tab from window even if the source window is maximized or fullscreen. (regression on 4.0.13)
+   * Prevent unexpected jumping of tabs on scrolling, when tab height is expanded by extra tab contents above/below tabs provided by helper addons.
  - 4.0.13 (2024.4.10)
    * Apply new-tab-command-tab behavior correctly. (regression on 4.0.12)
    * Use `GrayText` instead of `ButtonText` as the tabs border color in the "High Contrast" theme, to reduce stresses from too high contrast.
