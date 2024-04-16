@@ -63,7 +63,8 @@ Edited screenshots or screencast may help my understanding.
 Please describe what actually happens.
 Screenshots or screencast may help my understanding.
 
-Messages in ["Console" of the developer tools](https://github.com/piroor/treestyletab/wiki/How-to-inspect-tree-of-tabs#how-to-start-debugger-for-tree-style-tab) may help investigation also.
+Messages in the "Console" of the developer tools may help investigation also.
+https://github.com/piroor/treestyletab/wiki/How-to-inspect-tree-of-tabs#how-to-start-debugger-for-tree-style-tab
 -->
 
 ## Environment
