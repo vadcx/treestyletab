@@ -52,9 +52,19 @@ E (selected)
 
 ## Expected result
 
+<!--
+Please describe what should happen.
+Edited screenshots or screencast may help my understanding.
+-->
 
 ## Actual result
 
+<!--
+Please describe what actually happens.
+Screenshots or screencast may help my understanding.
+
+Messages in ["Cosole" of the developer tools](https://github.com/piroor/treestyletab/wiki/How-to-inspect-tree-of-tabs#how-to-start-debugger-for-tree-style-tab) may help investigation also.
+-->
 
 ## Environment
 

@@ -46,9 +46,17 @@ E (selected)
 
 ## Expected result
 
+<!--
+Please describe what should happen.
+Edited screenshots or screencast may help my understanding.
+-->
 
 ## Actual (present) result
 
+<!--
+Please describe what actually happens now.
+Screenshots or screencast may help my understanding.
+-->
 
 ## Environment
 
