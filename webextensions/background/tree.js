@@ -1662,9 +1662,12 @@ export async function openNewWindowFromTabs(tabs, options = {}) {
     //active: true,  // not supported in Firefox...
     url:       'about:blank',
     ...sourceParams,
-    left: sourceParams.left + 20,
-    top:  sourceParams.top + 20,
   };
+  // positions are not provided for a maximized or fullscren window!
+  if (typeof sourceParams.left == 'number')
+    sourceParams.left += 20;
+  if (typeof sourceParams.top == 'number')
+    sourceParams.top += 20;
   let newWindow;
   const promsiedNewWindow = browser.windows.create(windowParams)
     .then(createdWindow => {
