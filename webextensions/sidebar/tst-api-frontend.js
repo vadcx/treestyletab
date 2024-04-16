@@ -376,15 +376,6 @@ export function setExtraContentsTo(tab, id, params = {}) {
   setExtraTabContentsToElement(tab.$TST.element, id, params);
 }
 
-function cacheKeyFor(id) {
-  return `$$lastContentsSourceFor_${id}`;
-}
-
-function getCacheHolder(container) {
-  const cacheHolderElement = container?.host?.closest(kTAB_ELEMENT_NAME) || container;
-  return cacheHolderElement.$TST || cacheHolderElement;
-}
-
 function setExtraContentsToContainer(container, id, params = {}) {
   if (id == '*') {
     for (const id of container.itemById.keys()) {
@@ -398,8 +389,26 @@ function setExtraContentsToContainer(container, id, params = {}) {
     id = browser.runtime.id;
   }
 
-  const cacheHolder = params.autoReinsert && getCacheHolder(container);
-  const cacheKey = params.autoReinsert && cacheKeyFor(id);
+  let cacheHolder, cacheKey;
+  const place = String(params.place).toLowerCase();
+  if (AUTO_REINSERT_PLACES.has(place)) {
+    const cacheHolderElement = container?.host?.closest(kTAB_ELEMENT_NAME) || container;
+    cacheHolder = cacheHolderElement.$TST || cacheHolderElement;
+    cacheKey = `$$lastContentsSourceFor_${id}`;
+    params = {
+      ...params,
+      contents: params.contents || cacheHolder[cacheKey] || null,
+    };
+    switch (place) {
+      case 'tab-above':
+        onExtraContentsAboveChanged(id, params);
+        break;
+
+      case 'tab-below':
+        onExtraContentsBelowChanged(id, params);
+        break;
+    }
+  }
 
   let item = container.itemById.get(id);
   if (!params.style &&
@@ -416,7 +425,7 @@ function setExtraContentsToContainer(container, id, params = {}) {
       container.removeChild(item);
       container.itemById.delete(id);
     }
-    if (params.autoReinsert)
+    if (cacheHolder)
       cacheHolder[cacheKey] = null;
     return;
   }
@@ -438,7 +447,7 @@ function setExtraContentsToContainer(container, id, params = {}) {
   }
 
   const contentsSource = String(params.contents || '').trim();
-  if (params.autoReinsert)
+  if (cacheHolder)
     cacheHolder[cacheKey] = contentsSource;
 
   const range = document.createRange();
@@ -496,9 +505,8 @@ function setExtraTabContentsToElement(tabElement, id, params = {}) {
     params = id;
     id = browser.runtime.id;
   }
-  const place = String(params.place).toLowerCase();
   let container;
-  switch (place) {
+  switch (String(params.place).toLowerCase()) {
     case 'indent': // for backward compatibility
     case 'tab-indent':
       container = tabElement.extraItemsContainerIndentRoot;
@@ -517,27 +525,15 @@ function setExtraTabContentsToElement(tabElement, id, params = {}) {
 
     case 'tab-above':
       container = tabElement.extraItemsContainerAboveRoot;
-      onExtraContentsAboveChanged(id, params);
       break;
 
     case 'tab-above':
       container = tabElement.extraItemsContainerBelowRoot;
-      onExtraContentsBelowChanged(id, params);
       break;
   }
 
-  if (container) {
-    if (AUTO_REINSERT_PLACES.has(place)) {
-      const cacheHolder = getCacheHolder(container);
-      const cacheKey = cacheKeyFor(id);
-      params = {
-        ...params,
-        contents:     params.contents || cacheHolder[cacheKey] || null,
-        autoReinsert: true,
-      };
-    }
+  if (container)
     return setExtraContentsToContainer(container, id, params);
-  }
 }
 
 function onExtraContentsAboveChanged(id, params) {
@@ -550,10 +546,7 @@ function onExtraContentsAboveChanged(id, params) {
   window.requestAnimationFrame(() => {
     if (onExtraContentsAboveChanged.lastStartedAt != startAt)
       return;
-    setExtraContentsToContainer(mDummyTab.extraItemsContainerAboveRoot, id, {
-      ...params,
-      autoReinsert: true,
-    });
+    setExtraContentsToContainer(mDummyTab.extraItemsContainerAboveRoot, id, params);
     throttledUpdateSize();
   });
 }
@@ -568,10 +561,7 @@ function onExtraContentsBelowChanged(id, params) {
   window.requestAnimationFrame(() => {
     if (onExtraContentsAboveChanged.lastStartedAt != startAt)
       return;
-    setExtraContentsToContainer(mDummyTab.extraItemsContainerBelowRoot, id, {
-      ...params,
-      autoReinsert: true,
-    });
+    setExtraContentsToContainer(mDummyTab.extraItemsContainerBelowRoot, id, params);
     throttledUpdateSize();
   });
 }
