@@ -128,7 +128,8 @@ export function init(scrollPosition) {
   wait(1000).then(() => {
     mNormalScrollBox.removeEventListener('overflow', onInitialOverflow);
     onVirtualScrollViewportUpdated.removeListener(onInitialUpdate);
-    if (restoreScrollPosition.scrollPosition != -1)
+    if (restoreScrollPosition.scrollPosition != -1 &&
+        mScrollingInternallyCount > 0)
       mScrollingInternallyCount--;
     restoreScrollPosition.scrollPosition = -1;
     log('timeout: give up to restore scroll position');
@@ -164,9 +165,12 @@ function restoreScrollPosition() {
         restoreScrollPosition.scrollPosition
       );
   restoreScrollPosition.scrollPosition = -1;
-  window.requestAnimationFrame(() => {
-    mScrollingInternallyCount--;
-  });
+  if (mScrollingInternallyCount > 0) {
+    window.requestAnimationFrame(() => {
+      if (mScrollingInternallyCount > 0)
+        mScrollingInternallyCount--;
+    });
+  }
 }
 restoreScrollPosition.retryCount = 0;
 restoreScrollPosition.scrollPosition = -1;
@@ -596,7 +600,8 @@ function scrollTo(params = {}) {
       Math.max(0, scrollTop)
     );
   window.requestAnimationFrame(() => {
-    mScrollingInternallyCount--;
+    if (mScrollingInternallyCount > 0)
+      mScrollingInternallyCount--;
   });
 }
 
