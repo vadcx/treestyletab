@@ -302,9 +302,9 @@ function renderVirtualScrollViewport(scrollPosition = undefined) {
     const renderOperations = (new SequenceMatcher(mLastRenderedVirtualScrollTabIds, toBeRenderedTabIds)).operations();
     log('renderVirtualScrollViewport ', {
       firstRenderableIndex,
-      firstRenderableTabIndex: renderableTabs[firstRenderableIndex].index,
+      firstRenderableTabIndex: renderableTabs[firstRenderableIndex]?.index,
       lastRenderableIndex,
-      lastRenderableTabIndex: renderableTabs[lastRenderableIndex].index,
+      lastRenderableTabIndex: renderableTabs[lastRenderableIndex]?.index,
       old: mLastRenderedVirtualScrollTabIds.slice(0),
       new: toBeRenderedTabIds.slice(0),
       renderOperations,
