@@ -45,6 +45,10 @@ export function isSidebarOpen(windowId) {
       configs.sidebarVirtuallyClosedWindows.includes(windowId))
     return false;
 
+  if (windowId in configs.sidebarWidthInWindow &&
+      configs.sidebarWidthInWindow[windowId] == 0)
+    return false;
+
   const connections = mConnections.get(windowId);
   if (!connections)
     return false;
@@ -66,6 +70,10 @@ export function isOpen(windowId) {
     return true;
   if (configs.sidebarVirtuallyClosedWindows.length > 0 &&
       configs.sidebarVirtuallyClosedWindows.includes(windowId))
+    return false;
+
+  if (windowId in configs.sidebarWidthInWindow &&
+      configs.sidebarWidthInWindow[windowId] == 0)
     return false;
 
   const connections = mConnections.get(windowId);
@@ -205,8 +213,12 @@ if (Constants.IS_BACKGROUND) {
         connectionTimeoutTimer = null;
       }
       connections.delete(connection);
-      if (connections.size == 0)
+      if (connections.size == 0) {
         mConnections.delete(windowId);
+        const sidebarWidthInWindow = { ...configs.sidebarWidthInWindow };
+        delete sidebarWidthInWindow[windowId];
+        configs.sidebarWidthInWindow = sidebarWidthInWindow;
+      }
       port.onMessage.removeListener(receiver); // eslint-disable-line no-use-before-define
       mReceivers.delete(windowId);
       mFocusState.delete(windowId);

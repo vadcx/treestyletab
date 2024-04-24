@@ -786,6 +786,10 @@ function updateTabbarLayout({ reason, reasons, timeout, justNow } = {}) {
   document.documentElement.style.setProperty('--after-tabs-area-size', `${newTabButtonSize}px`);
   Size.updateContainers();
 
+  const sidebarWidthInWindow = { ...configs.sidebarWidthInWindow };
+  sidebarWidthInWindow[TabsStore.getCurrentWindowId()] = window.innerWidth;
+  configs.sidebarWidthInWindow = sidebarWidthInWindow;
+
   if (!(reasons & Constants.kTABBAR_UPDATE_REASON_VIRTUAL_SCROLL_VIEWPORT_UPDATE))
     Scroll.reserveToRenderVirtualScrollViewport({ trigger: 'resized' });
 

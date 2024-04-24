@@ -65,6 +65,7 @@ const localKeys = DEVICE_SPECIFIC_CONFIG_KEYS.concat(mapAndFilter(`
   sidebarPosition
   sidebarVirtuallyClosedWindows
   sidebarVirtuallyOpenedWindows
+  sidebarWidthInWindow
   startDragTimeout
   style
   subMenuCloseDelay
@@ -361,6 +362,7 @@ export const configs = new Configs({
   grantedRemovingTabIds: [],
   sidebarVirtuallyOpenedWindows: [], // for automated tests
   sidebarVirtuallyClosedWindows: [], // for automated tests
+  sidebarWidthInWindow: {},
 
 
   // animation
