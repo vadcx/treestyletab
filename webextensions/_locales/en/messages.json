@@ -354,6 +354,8 @@
   "context_openAllBookmarksWithStructure_label": { "message": "Open &All as a Tree" },
   "context_openAllBookmarksWithStructureRecursively_label": { "message": "Open &All as a Tree including subfolders" },
 
+  "config_showTreeCommandsInTabsContextMenuGlobally_label": { "message": "Show commands for tree of tabs in tab context menu globally ex. on the native tab bar" },
+
 
   "config_title": { "message": "Tree Style Tab Options" },
 

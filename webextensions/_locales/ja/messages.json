@@ -350,6 +350,8 @@
   "context_openAllBookmarksWithStructure_label": { "message": "ツリーとしてすべて開く(&A)" },
   "context_openAllBookmarksWithStructureRecursively_label": { "message": "サブフォルダーも含めてツリーとしてすべて開く(&A)" },
 
+  "config_showTreeCommandsInTabsContextMenuGlobally_label": { "message": "ネイティブのタブバー上など、タブのコンテキストメニュー全般にツリー操作用のコマンドを表示する" },
+
 
 
   "config_title": { "message": "Tree Style Tabの設定" },

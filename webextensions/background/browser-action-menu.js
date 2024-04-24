@@ -437,6 +437,14 @@ const mItems = [
       { type: 'separator',
         expert: true, },
       {
+        title: browser.i18n.getMessage('config_showTreeCommandsInTabsContextMenuGlobally_label'),
+        key:   'showTreeCommandsInTabsContextMenuGlobally',
+        type:  'checkbox',
+        expert: true,
+      },
+      { type: 'separator',
+        expert: true, },
+      {
         title: browser.i18n.getMessage('config_extraItems_bookmarks_caption'),
         enabled: false,
         expert: true,
