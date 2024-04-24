@@ -397,7 +397,11 @@ function setExtraContentsToContainer(container, id, params = {}) {
     cacheKey = `$$lastContentsSourceFor_${id}`;
     params = {
       ...params,
-      contents: params.contents || cacheHolder[cacheKey] || null,
+      contents: (
+        params.contents ||
+        (!('contents' in params) && cacheHolder[cacheKey]) ||
+        null
+      ),
     };
     switch (place) {
       case 'tab-above':
