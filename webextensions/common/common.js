@@ -192,6 +192,7 @@ export const configs = new Configs({
 
   // context menu
   emulateDefaultContextMenu: true,
+  showTreeCommandsInTabsContextMenuGlobally: true,
 
   context_reloadTree: true,
   context_reloadDescendants: false,

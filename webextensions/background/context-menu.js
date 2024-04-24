@@ -352,7 +352,7 @@ function updateItem(id, params) {
   }, browser.runtime);
 }
 
-function updateItemsVisibility(items, { forceVisible = null, multiselected = false, hasUnmutedTab = false, hasUnmutedDescendant = false, hasAutoplayBlockedTab = false, hasAutoplayBlockedDescendant = false, sticky = false } = {}) {
+function updateItemsVisibility(items, { forceVisible = null, multiselected = false, hasUnmutedTab = false, hasUnmutedDescendant = false, hasAutoplayBlockedTab = false, hasAutoplayBlockedDescendant = false, sticky = false, hidden = false } = {}) {
   log('updateItemsVisibility ', items, { forceVisible, multiselected, hasUnmutedTab, hasUnmutedDescendant, hasAutoplayBlockedTab, hasAutoplayBlockedDescendant, sticky });
   let updated = false;
   let visibleItemsCount = 0;
@@ -371,7 +371,7 @@ function updateItemsVisibility(items, { forceVisible = null, multiselected = fal
     }
     else {
       const title = Commands.getMenuItemTitle(item, { multiselected, hasUnmutedTab, hasUnmutedDescendant, sticky });
-      let visible = !(item.configKey in configs) || configs[item.configKey] || false;
+      let visible = !hidden && (!(item.configKey in configs) || configs[item.configKey] || false);
       log('checking ', item.id, {
         config: visible,
         multiselected: item.hideOnMultiselected && multiselected,
@@ -418,28 +418,28 @@ function updateItemsVisibility(items, { forceVisible = null, multiselected = fal
   return { updated, visibleItemsCount };
 }
 
-async function updateItems({ multiselected, hasUnmutedTab, hasUnmutedDescendant, hasAutoplayBlockedTab, hasAutoplayBlockedDescendant, sticky } = {}) {
+async function updateItems({ multiselected, hasUnmutedTab, hasUnmutedDescendant, hasAutoplayBlockedTab, hasAutoplayBlockedDescendant, sticky, hidden } = {}) {
   let updated = false;
 
-  const groupedItems = updateItemsVisibility(mGroupedTabItems, { multiselected, hasUnmutedTab, hasUnmutedDescendant, hasAutoplayBlockedTab, hasAutoplayBlockedDescendant, sticky });
+  const groupedItems = updateItemsVisibility(mGroupedTabItems, { multiselected, hasUnmutedTab, hasUnmutedDescendant, hasAutoplayBlockedTab, hasAutoplayBlockedDescendant, sticky, hidden });
   if (groupedItems.updated)
     updated = true;
 
-  const separatorVisible = configs.emulateDefaultContextMenu && groupedItems.visibleItemsCount > 0;
+  const separatorVisible = !hidden && configs.emulateDefaultContextMenu && groupedItems.visibleItemsCount > 0;
   if (separatorVisible != mTabSeparator.lastVisible) {
     updateItem(mTabSeparator.id, { visible: separatorVisible });
     mTabSeparator.lastVisible = separatorVisible;
     updated = true;
   }
 
-  const grouped = configs.emulateDefaultContextMenu && groupedItems.visibleItemsCount > 1;
+  const grouped = !hidden && configs.emulateDefaultContextMenu && groupedItems.visibleItemsCount > 1;
   if (grouped != mTabRootItem.lastVisible) {
     updateItem(mTabRootItem.id, { visible: grouped });
     mTabRootItem.lastVisible = grouped;
     updated = true;
   }
 
-  const topLevelItems = updateItemsVisibility(mTabItems, { forceVisible: grouped ? false : null, multiselected, hasUnmutedTab, hasUnmutedDescendant, hasAutoplayBlockedTab, hasAutoplayBlockedDescendant, sticky });
+  const topLevelItems = updateItemsVisibility(mTabItems, { forceVisible: grouped ? false : null, multiselected, hasUnmutedTab, hasUnmutedDescendant, hasAutoplayBlockedTab, hasAutoplayBlockedDescendant, sticky, hidden });
   if (topLevelItems.updated)
     updated = true;
 
@@ -624,6 +624,7 @@ async function onTabContextMenuShown(info, tab) {
     hasAutoplayBlockedTab,
     hasAutoplayBlockedDescendant,
     sticky: tab?.$TST.sticky,
+    hidden: !configs.showTreeCommandsInTabsContextMenuGlobally && info.viewType != 'sidebar',
   });
   if (mLastContextTabId != contextTabId)
     return; // Skip further operations if the menu was already reopened on a different context tab.
