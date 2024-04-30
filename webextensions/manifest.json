@@ -101,6 +101,12 @@
     "expandAll": {
       "description": "__MSG_context_expandAll_command__"
     },
+    "toggleTreeCollapsed": {
+      "description": "__MSG_command_toggleTreeCollapsed__"
+    },
+    "toggleTreeCollapsedRecursively": {
+      "description": "__MSG_command_toggleTreeCollapsedRecursively__"
+    },
     "bookmarkTree": {
       "description": "__MSG_context_bookmarkTree_command__"
     },

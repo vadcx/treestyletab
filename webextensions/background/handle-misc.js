@@ -305,6 +305,19 @@ async function onShortcutCommand(command) {
       });
       return;
 
+    case 'toggleTreeCollapsed':
+      if (activeTab.$TST.subtreeCollapsed)
+        Commands.expandTree(selectedTabs);
+      else
+        Commands.collapseTree(selectedTabs);
+      return;
+    case 'toggleTreeCollapsedRecursively':
+      if (activeTab.$TST.subtreeCollapsed)
+        Commands.expandTree(selectedTabs, { recursively: true });
+      else
+        Commands.collapseTree(selectedTabs, { recursively: true });
+      return;
+
     case 'toggleSubPanel':
       SidebarConnection.sendMessage({
         type:     Constants.kCOMMAND_TOGGLE_SUBPANEL,
