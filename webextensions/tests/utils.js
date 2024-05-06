@@ -104,7 +104,7 @@ export async function refreshTabs(tabs) {
       type:   Constants.kCOMMAND_PULL_TABS,
       tabIds: tabs.map(tab => tab.id)
     });
-    return tabs.map(tab => Tab.track(tab));
+    return tabs.map(tab => Tab.import(tab));
   }
 
   if (typeof tabs == 'object') {
@@ -118,7 +118,7 @@ export async function refreshTabs(tabs) {
       idToName[tabs[name].id] = name;
     }
     for (const tab of refreshedTabsArray) {
-      refreshedTabs[idToName[tab.id]] = Tab.track(tab);
+      refreshedTabs[idToName[tab.id]] = Tab.import(tab);
     }
     console.log('refreshedTabs: ', Object.entries(refreshedTabs).map(([name, tab]) => `${name}(${tab.id})`));
     return refreshedTabs;

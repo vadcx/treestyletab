@@ -561,10 +561,7 @@ async function rebuildAll(importedTabs) {
       Tab.untrack(tab.id);
   }
 
-  // Failsafe: we use Tab.track() again here, to track tabs newly opened since
-  // the initialization process was started. It is safe because already tracked
-  // tabs are just imported.
-  const tabs = importedTabs.map(importedTab => Tab.track(importedTab));
+  const tabs = importedTabs.map(importedTab => Tab.import(importedTab));
 
   Window.init(mTargetWindow);
   let lastDraw = Date.now();
