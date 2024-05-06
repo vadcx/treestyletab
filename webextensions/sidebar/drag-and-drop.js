@@ -258,14 +258,21 @@ function getDropAction(event) {
         if (info.draggedTab.windowId != TabsStore.getCurrentWindowId()) {
           return true;
         }
-        if (info.parent &&
+        if (!configs.allowDropParentToDescendant &&
+            info.parent &&
             info.parent.id == info.draggedTab.id) {
           log('canDrop:undroppable: drop on child');
           return false;
         }
         if (info.dragOverTab) {
-          if (info.draggedTabIds.includes(info.dragOverTab.id)) {
+          if (info.draggedTab.id == info.dragOverTab.id) {
             log('canDrop:undroppable: on self');
+            return false;
+          }
+          if (configs.allowDropParentToDescendant)
+            return true;
+          if (info.draggedTabIds.includes(info.dragOverTab.id)) {
+            log('canDrop:undroppable: on dragging tabs');
             return false;
           }
           const ancestors = info.dragOverTab.$TST.ancestors;
@@ -1236,17 +1243,33 @@ function onDrop(event) {
       configs.workaroundForBug1548949DroppedTabs = dropActionInfo.dragData.tabs.map(tab => `${mInstanceId}/${tab.id}`).join('\n');
       log('workaround for bug 1548949: setting last dropped tabs: ', configs.workaroundForBug1548949DroppedTabs);
     }
+    let draggedTabs    = dropActionInfo.dragData.tabs;
+    let structure      = dropActionInfo.dragData.structure;
+    let insertBeforeId = dropActionInfo.insertBefore?.id;
+    let insertAfterId  = dropActionInfo.insertAfter?.id;
+    if (dt.dropEffect == 'move' &&
+        draggedTabs.some(tab => tab.id == dropActionInfo.dragOverTab?.id)) {
+      log('dropping parent to descendant: partial attach mode');
+      for (let i = draggedTabs.length - 1; i > -1; i--) {
+        if (structure[i].parent < 0)
+          continue;
+        draggedTabs.splice(i, 1);
+        structure.splice(i, 1);
+      }
+      insertAfterId  = dropActionInfo.dragOverTab?.id;
+      insertBeforeId = null;
+    }
     const fromOtherProfile = dropActionInfo.dragData.instanceId != mInstanceId;
     BackgroundConnection.sendMessage({
       type:                Constants.kCOMMAND_PERFORM_TABS_DRAG_DROP,
       windowId:            dropActionInfo.dragData.windowId,
-      tabs:                dropActionInfo.dragData.tabs,
-      structure:           dropActionInfo.dragData.structure,
+      tabs:                draggedTabs,
+      structure,
       action:              dropActionInfo.action,
       allowedActions:      dropActionInfo.dragData.behavior,
-      attachToId:          dropActionInfo.parent && dropActionInfo.parent.id,
-      insertBeforeId:      dropActionInfo.insertBefore && dropActionInfo.insertBefore.id,
-      insertAfterId:       dropActionInfo.insertAfter && dropActionInfo.insertAfter.id,
+      attachToId:          dropActionInfo.parent?.id,
+      insertBeforeId,
+      insertAfterId,
       destinationWindowId: TabsStore.getCurrentWindowId(),
       duplicate:           !fromOtherProfile && dt.dropEffect == 'copy',
       import:              fromOtherProfile

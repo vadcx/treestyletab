@@ -542,6 +542,7 @@ export async function moveTabsWithStructure(tabs, params = {}) {
   }
   log('=> movedTabs: ', () => ['moved', movedTabs.map(dumpTab).join(' / '), 'whole', movedWholeTree.map(dumpTab).join(' / ')]);
 
+  if (!configs.allowDropParentToDescendant) {
   while (params.insertBefore &&
          movedWholeTree.includes(params.insertBefore)) {
     params.insertBefore = params.insertBefore?.$TST.nextTab;
@@ -549,6 +550,7 @@ export async function moveTabsWithStructure(tabs, params = {}) {
   while (params.insertAfter &&
          movedWholeTree.includes(params.insertAfter)) {
     params.insertAfter = params.insertAfter?.$TST.previousTab;
+  }
   }
 
   const windowId = params.windowId || tabs[0].windowId;
@@ -562,11 +564,14 @@ export async function moveTabsWithStructure(tabs, params = {}) {
   if (movedTabs[0].incognito != Tab.getFirstTab(destinationWindowId).incognito)
     return [];
 
-  if (!params.import && movedWholeTree.length != movedTabs.length) {
+  if (!params.import &&
+      movedWholeTree.length != movedTabs.length) {
     log('=> partially moved');
     if (!params.duplicate)
       await Tree.detachTabsFromTree(movedTabs, {
-        broadcast: params.broadcast
+        insertBefore: params.insertBefore,
+        insertAfter:  params.insertAfter,
+        broadcast:    params.broadcast,
       });
   }
 

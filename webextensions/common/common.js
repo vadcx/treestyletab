@@ -273,6 +273,7 @@ export const configs = new Configs({
   showTabDragBehaviorNotification: true,
   guessDraggedNativeTabs: true,
   ignoreTabDropNearSidebarArea: true,
+  allowDropParentToDescendant: false,
 
   fixupTreeOnTabVisibilityChanged: false,
   fixupOrderOfTabsFromOtherDevice: true,
