@@ -544,17 +544,17 @@ export async function moveTabsWithStructure(tabs, params = {}) {
 
   while (params.insertBefore &&
          movedWholeTree.includes(params.insertBefore)) {
-    params.insertBefore = params.insertBefore && params.insertBefore.$TST.nextTab;
+    params.insertBefore = params.insertBefore?.$TST.nextTab;
   }
   while (params.insertAfter &&
          movedWholeTree.includes(params.insertAfter)) {
-    params.insertAfter = params.insertAfter && params.insertAfter.$TST.previousTab;
+    params.insertAfter = params.insertAfter?.$TST.previousTab;
   }
 
   const windowId = params.windowId || tabs[0].windowId;
   const destinationWindowId = params.destinationWindowId ||
-    params.insertBefore && params.insertBefore.windowId || 
-      params.insertAfter && params.insertAfter.windowId ||
+    params.insertBefore?.windowId ||
+      params.insertAfter?.windowId ||
         windowId;
 
   // Basically tabs should not be moved between regular window and private browsing window,
