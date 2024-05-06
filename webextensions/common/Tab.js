@@ -2468,8 +2468,10 @@ Tab.init = (tab, options = {}) => {
 
 Tab.import = tab => {
   const existingTab = Tab.get(tab.id);
-  if (existingTab)
-    existingTab.$TST.apply(tab);
+  if (!existingTab) {
+    return Tab.init(tab);
+  }
+  existingTab.$TST.apply(tab);
   return existingTab;
 };
 
