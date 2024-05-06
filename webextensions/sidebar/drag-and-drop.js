@@ -36,6 +36,7 @@ import {
   sha1sum,
   isMacOS,
   isLinux,
+  dumpTab,
 } from '/common/common.js';
 import * as ApiTabs from '/common/api-tabs.js';
 import * as BackgroundConnection from './background-connection.js';
@@ -1230,7 +1231,7 @@ function onDrop(event) {
 
   if (dropActionInfo.dragData &&
       dropActionInfo.dragData.tab) {
-    log('there are dragged tabs');
+    log('there are dragged tabs: ', () => dropActionInfo.dragData.tabs.map(dumpTab));
     if (configs.enableWorkaroundForBug1548949) {
       configs.workaroundForBug1548949DroppedTabs = dropActionInfo.dragData.tabs.map(tab => `${mInstanceId}/${tab.id}`).join('\n');
       log('workaround for bug 1548949: setting last dropped tabs: ', configs.workaroundForBug1548949DroppedTabs);

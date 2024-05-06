@@ -540,7 +540,7 @@ export async function moveTabsWithStructure(tabs, params = {}) {
         movedWholeTree.push(descendant);
     }
   }
-  log('=> movedTabs: ', () => movedTabs.map(dumpTab).join(' / '));
+  log('=> movedTabs: ', () => ['moved', movedTabs.map(dumpTab).join(' / '), 'whole', movedWholeTree.map(dumpTab).join(' / ')]);
 
   while (params.insertBefore &&
          movedWholeTree.includes(params.insertBefore)) {
@@ -703,7 +703,7 @@ export async function moveTabsWithStructure(tabs, params = {}) {
 }
 
 async function attachTabsWithStructure(tabs, parent, options = {}) {
-  log('attachTabsWithStructure: start ', () => [tabs.map(dumpTab), dumpTab(parent)]);
+  log('attachTabsWithStructure: start ', () => ['tabs', ...tabs.map(dumpTab), 'parent', dumpTab(parent), 'insertBefore', dumpTab(options.insertBefore), 'insertAfter', dumpTab(options.insertAfter)]);
   if (parent &&
       !options.insertBefore &&
       !options.insertAfter) {
