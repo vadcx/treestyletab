@@ -1243,8 +1243,8 @@ function onDrop(event) {
       configs.workaroundForBug1548949DroppedTabs = dropActionInfo.dragData.tabs.map(tab => `${mInstanceId}/${tab.id}`).join('\n');
       log('workaround for bug 1548949: setting last dropped tabs: ', configs.workaroundForBug1548949DroppedTabs);
     }
-    let draggedTabs    = dropActionInfo.dragData.tabs;
-    let structure      = dropActionInfo.dragData.structure;
+    const draggedTabs  = dropActionInfo.dragData.tabs;
+    const structure    = dropActionInfo.dragData.structure;
     let insertBeforeId = dropActionInfo.insertBefore?.id;
     let insertAfterId  = dropActionInfo.insertAfter?.id;
     if (dt.dropEffect == 'move' &&
