@@ -1247,7 +1247,8 @@ function onDrop(event) {
     const structure    = dropActionInfo.dragData.structure;
     let insertBeforeId = dropActionInfo.insertBefore?.id;
     let insertAfterId  = dropActionInfo.insertAfter?.id;
-    if (dt.dropEffect == 'move' &&
+    if (configs.allowDropParentToDescendant &&
+        dt.dropEffect == 'move' &&
         draggedTabs.some(tab => tab.id == dropActionInfo.dragOverTab?.id)) {
       log('dropping parent to descendant: partial attach mode');
       for (let i = draggedTabs.length - 1; i > -1; i--) {
