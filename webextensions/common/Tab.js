@@ -2182,8 +2182,10 @@ Tab.track = tab => {
     new Tab(tab);
   }
   else {
-    if (trackedTab)
+    if (trackedTab) {
+      trackedTab.$TST.apply(tab);
       tab = trackedTab;
+    }
     const win = TabsStore.windows.get(tab.windowId);
     win.trackTab(tab);
   }
@@ -2464,13 +2466,6 @@ Tab.init = (tab, options = {}) => {
   }
 
   return tab;
-};
-
-Tab.import = tab => {
-  const existingTab = Tab.get(tab.id);
-  if (existingTab)
-    existingTab.$TST.apply(tab);
-  return existingTab;
 };
 
 
