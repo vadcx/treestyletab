@@ -543,14 +543,14 @@ export async function moveTabsWithStructure(tabs, params = {}) {
   log('=> movedTabs: ', () => ['moved', movedTabs.map(dumpTab).join(' / '), 'whole', movedWholeTree.map(dumpTab).join(' / ')]);
 
   const movedTabsSet = new Set(movedTabs);
-    while (params.insertBefore &&
-           movedTabsSet.has(params.insertBefore)) {
-      params.insertBefore = params.insertBefore?.$TST.nextTab;
-    }
-    while (params.insertAfter &&
-           movedTabsSet.has(params.insertAfter)) {
-      params.insertAfter = params.insertAfter?.$TST.previousTab;
-    }
+  while (params.insertBefore &&
+         movedTabsSet.has(params.insertBefore)) {
+    params.insertBefore = params.insertBefore?.$TST.nextTab;
+  }
+  while (params.insertAfter &&
+         movedTabsSet.has(params.insertAfter)) {
+    params.insertAfter = params.insertAfter?.$TST.previousTab;
+  }
 
   const windowId = params.windowId || tabs[0].windowId;
   const destinationWindowId = params.destinationWindowId ||
