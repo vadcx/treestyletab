@@ -259,8 +259,7 @@ function getDropAction(event) {
           return true;
         }
         if (!configs.allowDropParentToDescendant &&
-            info.parent &&
-            info.parent.id == info.draggedTab.id) {
+            info.parent?.id == info.draggedTab.id) {
           log('canDrop:undroppable: drop on child');
           return false;
         }
