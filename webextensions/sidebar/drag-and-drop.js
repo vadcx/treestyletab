@@ -258,7 +258,7 @@ function getDropAction(event) {
         if (info.draggedTab.windowId != TabsStore.getCurrentWindowId()) {
           return true;
         }
-        if (!configs.allowDropParentToDescendant &&
+        if (!configs.moveSoloTabOnDropParentToDescendant &&
             info.parent?.id == info.draggedTab.id) {
           log('canDrop:undroppable: drop on child');
           return false;
@@ -274,7 +274,7 @@ function getDropAction(event) {
             log('canDrop:undroppable: on dragging multiselected tabs');
             return false;
           }
-          if (configs.allowDropParentToDescendant)
+          if (configs.moveSoloTabOnDropParentToDescendant)
             return true;
           const ancestors = info.dragOverTab.$TST.ancestors;
           /* too many function call in this way, so I use alternative way for better performance.
@@ -1339,7 +1339,7 @@ function sanitizeDraggedTabs({ draggedTabs, structure, insertBefore, insertAfter
   const parentId = parent?.id;
   log('sanitizeDraggedTabs: ', () => ({ draggedTabs: draggedTabs.map(dumpTab), structure, insertBefore: dumpTab(insertBefore), insertAfter: dumpTab(insertAfter), parentId, isCopy }));
   if (isCopy ||
-      !configs.allowDropParentToDescendant ||
+      !configs.moveSoloTabOnDropParentToDescendant ||
       draggedTabs.every(tab => tab.id != parentId))
     return { draggedTabs, structure, insertBefore, insertAfter };
 
