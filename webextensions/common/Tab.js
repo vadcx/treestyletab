@@ -2204,7 +2204,7 @@ Tab.isTracked = tabId =>  {
 };
 
 Tab.get = tabId =>  {
-  return TabsStore.tabs.get(tabId);
+  return TabsStore.tabs.get(typeof tabId == 'number' ? tabId : tabId?.id);
 };
 
 Tab.getByUniqueId = id => {
