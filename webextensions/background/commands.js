@@ -542,16 +542,15 @@ export async function moveTabsWithStructure(tabs, params = {}) {
   }
   log('=> movedTabs: ', () => ['moved', movedTabs.map(dumpTab).join(' / '), 'whole', movedWholeTree.map(dumpTab).join(' / ')]);
 
-  if (!configs.allowDropParentToDescendant) {
+  const movedTabsSet = new Set(movedTabs);
     while (params.insertBefore &&
-           movedWholeTree.includes(params.insertBefore)) {
+           movedTabsSet.has(params.insertBefore)) {
       params.insertBefore = params.insertBefore?.$TST.nextTab;
     }
     while (params.insertAfter &&
-           movedWholeTree.includes(params.insertAfter)) {
+           movedTabsSet.has(params.insertAfter)) {
       params.insertAfter = params.insertAfter?.$TST.previousTab;
     }
-  }
 
   const windowId = params.windowId || tabs[0].windowId;
   const destinationWindowId = params.destinationWindowId ||
